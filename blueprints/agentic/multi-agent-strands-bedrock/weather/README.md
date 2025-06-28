@@ -1,11 +1,11 @@
 # AI Agents on EKS
 
-A weather assistant built with Strands Agents, MCP (Model Context Protocol), A2A (Agent to Agent), and REST API for providing weather forecasts and alerts.
+A generic AI agent framework built with Strands Agents, MCP (Model Context Protocol), A2A (Agent to Agent), and REST API. Configurable for any domain including weather forecasts, financial analysis, customer service, and more.
 
 
 ## Deploy your first AI Agent on EKS
 
-This tutorial will guide you through deploying the Weather Agent to Amazon EKS (Elastic Kubernetes Service) with multi-architecture support and Amazon Bedrock integration.
+This tutorial will guide you through deploying the Generic AI Agent Framework to Amazon EKS (Elastic Kubernetes Service) with multi-architecture support and Amazon Bedrock integration. The framework includes a Weather Assistant as a reference implementation.
 
 ### Table of Contents
 
@@ -479,6 +479,7 @@ kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
 ./test_e2e_rest_api_curl.sh
 ```
 The expected output:
+```
 ...
 ═══════════════════════════════════════════════════════════════════════════════
 🌤️  Workshop Test Summary
@@ -497,6 +498,7 @@ The expected output:
 
 ✨ Workshop participants can now interact with the Weather Agent! ✨
 ...
+```
 
 
 #### Automated Testing
