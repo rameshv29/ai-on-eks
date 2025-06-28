@@ -130,17 +130,17 @@ export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output t
 export AWS_REGION=us-west-2
 
 # EKS Cluster Configuration
-export CLUSTER_NAME=agents-on-eks
+export CLUSTER_NAME=agentic-ai-on-eks
 
 # Kubernetes Configuration
-export KUBERNETES_NAMESPACE=default
-export KUBERNETES_APP_NAME=weather-mcp-server
-export KUBERNETES_SERVICE_ACCOUNT=weather-mcp-server
+export KUBERNETES_APP_WEATHER_MCP_NAMESPACE=weather-mcp-server
+export KUBERNETES_APP_WEATHER_MCP_NAME=weather-mcp-server
+export KUBERNETES_APP_WEATHER_MCP_SERVICE_ACCOUNT=weather-mcp-server
 
 # ECR Configuration
 export ECR_REPO_NAME=mcp-servers/weather-mcp-server
 export ECR_REPO_HOST=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-export ECR_REPO_URI=${ECR_REPO_HOST}/${ECR_REPO_NAME}
+export ECR_REPO_WEATHER_MCP_URI=${ECR_REPO_HOST}/${ECR_REPO_NAME}
 ```
 
 ---
@@ -211,7 +211,7 @@ Build the image for both AMD64 and ARM64 architectures:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t ${ECR_REPO_URI}:latest \
+  -t ${ECR_REPO_WEATHER_MCP_URI}:latest \
   --push .
 ```
 
@@ -225,7 +225,7 @@ This command will:
 Confirm the image supports both architectures:
 
 ```bash
-docker manifest inspect ${ECR_REPO_URI}:latest
+docker manifest inspect ${ECR_REPO_WEATHER_MCP_URI}:latest
 ```
 
 You should see entries for both `linux/amd64` and `linux/arm64`.
@@ -237,9 +237,10 @@ You should see entries for both `linux/amd64` and `linux/arm64`.
 Deploy the weather MCP server using Helm:
 
 ```bash
-helm upgrade ${KUBERNETES_APP_NAME} helm --install \
---set serviceAccount.name=${KUBERNETES_SERVICE_ACCOUNT} \
-  --set image.repository=${ECR_REPO_URI} \
+helm upgrade ${KUBERNETES_APP_WEATHER_MCP_NAME} helm --install \
+  --namespace ${KUBERNETES_APP_WEATHER_MCP_NAMESPACE} --create-namespace \
+  --set serviceAccount.name=${KUBERNETES_APP_WEATHER_MCP_SERVICE_ACCOUNT} \
+  --set image.repository=${ECR_REPO_WEATHER_MCP_URI} \
   --set image.pullPolicy=Always \
   --set image.tag=latest
 ```
@@ -258,8 +259,8 @@ This will:
 Verify the pod is running successfully:
 
 ```bash
-kubectl rollout status deployment/${KUBERNETES_APP_NAME}
-kubectl get pods -l app.kubernetes.io/instance=${KUBERNETES_APP_NAME}
+kubectl rollout status deployment/${KUBERNETES_APP_WEATHER_MCP_NAME}
+kubectl get pods -l app.kubernetes.io/instance=${KUBERNETES_APP_WEATHER_MCP_NAME}
 ```
 > **Note:** Takes 3 minutes to provision a new node
 
@@ -275,7 +276,7 @@ weather-mcp-server-xxxxxxxxx-xxxxx   1/1     Running   0          2m
 View the weather MCP server logs:
 
 ```bash
-kubectl logs deployment/${KUBERNETES_APP_NAME}
+kubectl logs deployment/${KUBERNETES_APP_WEATHER_MCP_NAME}
 ```
 
 You should see:
@@ -289,8 +290,8 @@ INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
 Check that the service endpoint is created:
 
 ```bash
-kubectl get service ${KUBERNETES_APP_NAME}
-kubectl get endpoints ${KUBERNETES_APP_NAME}
+kubectl get service ${KUBERNETES_APP_WEATHER_MCP_NAME}
+kubectl get endpoints ${KUBERNETES_APP_WEATHER_MCP_NAME}
 ```
 
 ---
@@ -302,7 +303,7 @@ kubectl get endpoints ${KUBERNETES_APP_NAME}
 Forward the MCP server port to your local machine:
 
 ```bash
-kubectl port-forward service/${KUBERNETES_APP_NAME} 8080:mcp
+kubectl port-forward service/${KUBERNETES_APP_WEATHER_MCP_NAME} 8080:mcp
 ```
 
 Now you can connect with MCP clients to `http://localhost:8080/mcp`.
@@ -349,7 +350,7 @@ When you're done with the tutorial, clean up the resources to avoid charges:
 #### Step 1: Uninstall the Application
 
 ```bash
-helm uninstall ${KUBERNETES_APP_NAME}
+helm uninstall ${KUBERNETES_APP_WEATHER_MCP_NAME}
 ```
 
 #### Step 2: Delete ECR Repository

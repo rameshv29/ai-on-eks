@@ -1,43 +1,55 @@
-"""Interactive command-line interface for the Weather Agent."""
+"""Interactive command-line interface for the AI Agent."""
 
 from rich.console import Console
 from rich.markdown import Markdown
 
-from agent import get_weather_agent as get_agent
+from agent import get_agent
 
 def interactive_agent():
-    """Run an interactive command-line interface for the Weather Agent."""
-    print("\n📁 Weather Agent\n")
-    print("Ask a question about the weather forecast or alerts.\n\n")
+    """Run an interactive command-line interface for the AI Agent."""
+    console = Console()
 
-    print("You can try following queries:")
-    print("- What's the weather in Orlando, Florida this week?")
-    print("- Any weather alerts for Las Vegas today?")
-    print("Type 'exit' to quit.")
-
+    # Get agent instance to retrieve configuration
     agent = get_agent()
+
+    # Query the agent for welcome message and instructions
+    welcome_query = """Please provide a welcome message for users starting an interactive session with you. Include:
+1. Your name and brief description
+2. What you can help with
+3. 2-3 example queries users can try
+4. Instructions to type /quit to exit the session
+
+Format your response as a friendly welcome message."""
+
+    try:
+        welcome_response = agent(welcome_query)
+        console.print(Markdown(str(welcome_response)))
+    except Exception as e:
+        # Fallback welcome message if agent query fails
+        console.print(f"\n🤖 {agent.name}\n")
+        console.print(f"{agent.description}\n")
+        console.print("Ask me anything and I'll do my best to help!\n")
+        console.print("Type '/quit' to exit the session.\n")
 
     # Interactive loop
     while True:
         try:
             user_input = input("\n> ")
             if user_input.lower() == "/quit":
-                print("\nGoodbye! 👋")
+                console.print("\nGoodbye! 👋")
                 break
 
             response = agent(user_input)
 
-            print("\n\n=== RENDERED MARKDOWN ===\n")
-            console = Console()
+            console.print("\n")
             console.print(Markdown(str(response)))
-            print("\n=== END OF MARKDOWN ===\n")
 
         except KeyboardInterrupt:
-            print("\n\nExecution interrupted. Exiting...")
+            console.print("\n\nExecution interrupted. Exiting...")
             break
         except Exception as e:
-            print(f"\nAn error occurred: {str(e)}")
-            print("Please try asking a different question.")
+            console.print(f"\nAn error occurred: {str(e)}")
+            console.print("Please try asking a different question.")
 
 
 if __name__ == "__main__":

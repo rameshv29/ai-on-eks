@@ -1,8 +1,9 @@
-"""Weather agent module for providing weather forecasts and alerts."""
+"""Agent module for providing AI assistant functionality."""
 
 import json
 import os
-from typing import Dict, List, Optional, Any
+import re
+from typing import Dict, List, Optional, Any, Tuple
 
 from mcp import StdioServerParameters, stdio_client
 from mcp.client.streamable_http import streamablehttp_client
@@ -12,67 +13,121 @@ from strands.tools.mcp import MCPClient
 
 
 @tool
-def weather_assistant_tool(query: str) -> str:
+def agent_tool(query: str) -> str:
     """
     Process and respond to weather forecast or alert queries.
 
     Args:
-        query: The user's weather-related question
+        query: The user's question or request
 
     Returns:
         A helpful response addressing the user's query
     """
-    return weather_assistant(query)
-
-
-def weather_assistant(query: str) -> str:
-    """Process and respond to weather forecast or alert queries."""
     try:
-        weather_agent = get_weather_agent()
-        response = str(weather_agent(query))
+        agent = get_agent()
+        response = str(agent(query))
         if response:
             return response
     except Exception as e:
-        print(f"Error processing weather query: {str(e)}")
+        print(f"Error processing query: {str(e)}")
         return "I apologize, but I encountered an error while processing your request. Please try again later."
 
     return "I apologize, but I couldn't properly analyze your question. Could you please rephrase or provide more context?"
 
 
-def get_weather_agent() -> Agent:
+def _load_agent_config() -> Tuple[str, str, str]:
     """
-    Create and return a Weather Agent instance with dynamically loaded MCP tools.
+    Load agent configuration from agent.md file.
 
     Returns:
-        Agent: A configured weather assistant agent with tools from enabled MCP servers
+        Tuple[str, str, str]: (name, description, system_prompt)
+    """
+    # Get agent config file path from environment variable or use default
+    config_file = os.getenv("AGENT_CONFIG_FILE", os.path.join(os.path.dirname(__file__), "agent.md"))
+
+    if not os.path.exists(config_file):
+        print(f"Agent config file not found at {config_file}")
+        # Try fallback to cloudbot.md
+        fallback_config = os.path.join(os.path.dirname(__file__), "cloudbot.md")
+        if os.path.exists(fallback_config):
+            print(f"Using fallback configuration: {fallback_config}")
+            config_file = fallback_config
+        else:
+            raise FileNotFoundError(f"No agent configuration file found. Please provide either {config_file} or set AGENT_CONFIG_FILE environment variable.")
+
+    try:
+        with open(config_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Parse the markdown content
+        name = _extract_section(content, "Agent Name")
+        description = _extract_section(content, "Agent Description")
+        system_prompt = _extract_section(content, "System Prompt")
+
+        if not name or not description or not system_prompt:
+            raise ValueError(f"Agent configuration file {config_file} is missing required sections: Agent Name, Agent Description, or System Prompt")
+
+        return name.strip(), description.strip(), system_prompt.strip()
+
+    except Exception as e:
+        print(f"Error reading agent config file {config_file}: {str(e)}")
+        raise
+
+
+def _extract_section(content: str, section_name: str) -> Optional[str]:
+    """
+    Extract a section from markdown content.
+
+    Args:
+        content: The markdown content
+        section_name: The section header to look for
+
+    Returns:
+        Optional[str]: The section content or None if not found
+    """
+    # Pattern to match ## Section Name followed by content until next ## or end
+    pattern = rf"##\s+{re.escape(section_name)}\s*\n(.*?)(?=\n##|\Z)"
+    match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+
+    if match:
+        return match.group(1).strip()
+
+    return None
+
+def get_agent() -> Agent:
+    """
+    Create and return an Agent instance with dynamically loaded MCP tools.
+
+    Returns:
+        Agent: A configured AI assistant agent with tools from enabled MCP servers
     """
     model_id = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-3-7-sonnet-20250219-v1:0")
     bedrock_model = BedrockModel(model_id=model_id)
+
+    # Load agent configuration from agent.md file
+    agent_name, agent_description, system_prompt = _load_agent_config()
 
     try:
         # Load and combine tools from all enabled MCP servers
         all_tools = _load_mcp_tools_from_config()
 
-        # Create the weather agent with specific capabilities
-        weather_agent = Agent(
-            name="Weather Assistant",
-            description="Weather Assistant that provides weather forecasts and alerts",
+        # Create the agent with configuration from agent.md
+        agent = Agent(
+            name=agent_name,
+            description=agent_description,
             model=bedrock_model,
-            system_prompt="""You are Weather Assistant that helps the user with forecasts or alerts:
-- Provide weather forecasts for US cities for the next 3 days if no specific period is mentioned
-- When returning forecasts, always include whether the weather is good for outdoor activities for each day
-- Provide information about weather alerts for US cities when requested""",
+            system_prompt=system_prompt,
             tools=all_tools,
         )
 
-        return weather_agent
+        return agent
 
     except Exception as e:
         print(f"Error getting agent: {str(e)}")
         # Return a fallback agent when MCP client fails
         fallback_agent = Agent(
             model=bedrock_model,
-            system_prompt="""I am a Weather Assistant, but I'm currently experiencing technical difficulties accessing weather data.
+            system_prompt="""I am an AI Assistant, but I'm currently experiencing technical difficulties accessing my tools.
 I apologize for the inconvenience. Please try again later or contact support if the issue persists.""",
             tools=[],
         )
@@ -196,4 +251,4 @@ def _create_mcp_client() -> MCPClient:
 
 
 if __name__ == "__main__":
-    weather_assistant("Get the weather for Seattle")
+    agent_tool("Hello, how can you help me?")

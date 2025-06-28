@@ -1,6 +1,5 @@
 """Main entry point for the Weather Agent application."""
 
-import asyncio
 import logging
 import os
 import signal
@@ -8,10 +7,10 @@ import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
-from agent_a2a_server import weather_a2a_server as a2a_server_agent
+from agent_a2a_server  import a2a_agent
+from agent_mcp_server  import mcp_agent
+from agent_rest_api    import rest_api_agent
 from agent_interactive import interactive_agent
-from agent_mcp_server import weather_mcp_server as mcp_server_agent
-from agent_restapi import rest_api_agent
 
 # Configure logging
 logging.basicConfig(
@@ -27,13 +26,13 @@ logger = logging.getLogger(__name__)
 def main_mcp_server():
     """Start the MCP server."""
     logging.info("Starting MCP Server")
-    mcp_server_agent()
+    mcp_agent()
 
 
 def main_a2a_server():
     """Start the A2A server."""
     logging.info("Starting A2A Server")
-    a2a_server_agent()
+    a2a_agent()
 
 
 def main_rest_api():

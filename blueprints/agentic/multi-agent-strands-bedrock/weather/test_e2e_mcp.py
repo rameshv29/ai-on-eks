@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for the Weather Agent MCP (Model Context Protocol) Server
+Test script for the AI Agent MCP (Model Context Protocol) Server
 
 This script tests the MCP endpoints to ensure they work correctly.
 """
@@ -21,9 +21,9 @@ from mcp.types import (
 
 
 async def test_mcp_protocol(base_url: str = "http://localhost:8080"):
-    """Test the Weather Agent MCP Protocol endpoints"""
+    """Test the AI Agent MCP Protocol endpoints"""
 
-    print(f"Testing Weather Agent MCP Protocol at {base_url}")
+    print(f"Testing AI Agent MCP Protocol at {base_url}")
     print("=" * 50)
 
     try:
@@ -68,18 +68,18 @@ async def test_mcp_protocol(base_url: str = "http://localhost:8080"):
 
                 print()
 
-                # Test 3: Weather Forecast Tool Call
-                print("3. Testing weather forecast tool...")
+                # Test 3: Agent Query Tool Call
+                print("3. Testing agent query tool...")
                 try:
                     forecast_query = "What's the weather forecast for Seattle this weekend?"
                     print(f"   Query: {forecast_query}")
 
                     forecast_result = await session.call_tool(
-                        name="weather",
+                        name="query_agent",
                         arguments={"query": forecast_query}
                     )
 
-                    print("✅ Weather forecast tool successful")
+                    print("✅ Agent query tool successful")
                     if forecast_result.content:
                         content = forecast_result.content[0]
                         if hasattr(content, 'text'):
@@ -89,22 +89,22 @@ async def test_mcp_protocol(base_url: str = "http://localhost:8080"):
                             print(f"   Response: {str(content)[:100]}...")
 
                 except Exception as e:
-                    print(f"❌ Weather forecast tool failed: {str(e)}")
+                    print(f"❌ Agent query tool failed: {str(e)}")
 
                 print()
 
-                # Test 4: Weather Alert Tool Call
-                print("4. Testing weather alert tool...")
+                # Test 4: Agent Alert Query Tool Call
+                print("4. Testing agent alert query tool...")
                 try:
                     alert_query = "Are there any weather alerts for Miami, Florida?"
                     print(f"   Query: {alert_query}")
 
                     alert_result = await session.call_tool(
-                        name="weather",
+                        name="query_agent",
                         arguments={"query": alert_query}
                     )
 
-                    print("✅ Weather alert tool successful")
+                    print("✅ Agent alert query tool successful")
                     if alert_result.content:
                         content = alert_result.content[0]
                         if hasattr(content, 'text'):
@@ -114,26 +114,26 @@ async def test_mcp_protocol(base_url: str = "http://localhost:8080"):
                             print(f"   Response: {str(content)[:100]}...")
 
                 except Exception as e:
-                        print(f"❌ Weather alert tool failed: {str(e)}")
+                        print(f"❌ Agent alert query tool failed: {str(e)}")
 
                 print()
 
-                # Test 5: Complex Weather Query
-                print("5. Testing complex weather query...")
+                # Test 5: Complex Agent Query
+                print("5. Testing complex agent query...")
                 try:
                     complex_query = "Compare the weather between New York and Los Angeles for the next 3 days"
                     print(f"   Query: {complex_query}")
 
                     complex_result = await session.call_tool(
-                        name="weather",
+                        name="query_agent",
                         arguments={"query": complex_query}
                     )
 
-                    print("✅ Complex weather query successful")
+                    print("✅ Complex agent query successful")
                     display_formatted_response(complex_result)
 
                 except Exception as e:
-                    print(f"❌ Complex weather query failed: {str(e)}")
+                    print(f"❌ Complex agent query failed: {str(e)}")
 
                 print()
                 print("=" * 50)

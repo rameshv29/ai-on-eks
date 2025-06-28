@@ -1,20 +1,16 @@
-"""MCP server implementation for the Weather Agent."""
+"""MCP server implementation for the AI Agent."""
 
 import argparse
 import os
 
 from mcp.server.fastmcp import FastMCP
-
-from agent import get_weather_agent as get_agent
+from agent import get_agent
 
 # Initialize FastMCP server
-mcp = FastMCP("weather-agent")
-
-agent = get_agent()
-
+mcp = FastMCP("ai-agent")
 
 @mcp.tool()
-async def weather(query: str) -> str:
+async def query_agent(query: str) -> str:
     """
     Process and respond to weather forecast or alert queries.
 
@@ -22,17 +18,18 @@ async def weather(query: str) -> str:
         query: The user's input
 
     Returns:
-        A response to the user's weather query
+        A response to the user's query
     """
-    return str(agent(query))
+    # Get agent configuration for server naming
+    agent_instance = get_agent()
+    return str(agent_instance(query))
 
 
-def weather_mcp_server():
-    """Main entry point for the weather MCP server."""
-    print("Starting weather MCP server...")
+def mcp_agent():
+    """Main entry point for the AI agent MCP server."""
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Weather MCP Server')
+    parser = argparse.ArgumentParser(description='AI Agent MCP Server')
     parser.add_argument(
         '--transport',
         choices=['stdio', 'streamable-http'],
@@ -49,4 +46,4 @@ def weather_mcp_server():
 
 
 if __name__ == "__main__":
-    weather_mcp_server()
+    mcp_agent()

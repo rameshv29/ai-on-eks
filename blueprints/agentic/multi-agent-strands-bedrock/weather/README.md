@@ -11,14 +11,15 @@ This tutorial will guide you through deploying the Weather Agent to Amazon EKS (
 
 1. [Prerequisites](#prerequisites)
 2. [Environment Setup](#environment-setup)
-3. [Create EKS Cluster](#create-eks-cluster)
-4. [Configure IAM and Bedrock Access](#configure-iam-and-bedrock-access)
-5. [Container Registry Setup](#container-registry-setup)
-6. [Build and Push Multi-Architecture Image](#build-and-push-multi-architecture-image)
-7. [Deploy to Kubernetes](#deploy-to-kubernetes)
-8. [Verify Deployment](#verify-deployment)
-9. [Access the Weather Agent](#access-the-weather-agent)
-10. [Clean Up Resources](#clean-up-resources)
+3. [Agent Configuration](#agent-configuration)
+4. [Create EKS Cluster](#create-eks-cluster)
+5. [Configure IAM and Bedrock Access](#configure-iam-and-bedrock-access)
+6. [Container Registry Setup](#container-registry-setup)
+7. [Build and Push Multi-Architecture Image](#build-and-push-multi-architecture-image)
+8. [Deploy to Kubernetes](#deploy-to-kubernetes)
+9. [Verify Deployment](#verify-deployment)
+10. [Access the Weather Agent](#access-the-weather-agent)
+11. [Clean Up Resources](#clean-up-resources)
 
 ---
 
@@ -143,24 +144,95 @@ export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output t
 export AWS_REGION=us-west-2
 
 # EKS Cluster Configuration
-export CLUSTER_NAME=agents-on-eks
-
-# Amazon Bedrock Configuration
-export BEDROCK_MODEL_ID=us.anthropic.claude-3-7-sonnet-20250219-v1:0
-export BEDROCK_PODIDENTITY_IAM_ROLE=agents-on-eks-bedrock-role
+export CLUSTER_NAME=agentic-ai-on-eks
 
 # Kubernetes Configuration
-export KUBERNETES_APP_NAMESPACE=default
-export KUBERNETES_APP_NAME=weather-agent
-export KUBERNETES_APP_SERVICE_ACCOUNT=weather-agent
+export KUBERNETES_APP_WEATHER_AGENT_NAMESPACE=weather-agent
+export KUBERNETES_APP_WEATHER_AGENT_NAME=weather-agent
+export KUBERNETES_APP_WEATHER_AGENT_SERVICE_ACCOUNT=weather-agent
 
 # ECR Configuration
 export ECR_REPO_NAME=agents-on-eks/weather-agent
 export ECR_REPO_HOST=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-export ECR_REPO_URI=${ECR_REPO_HOST}/${ECR_REPO_NAME}
+export ECR_REPO_WEATHER_AGENT_URI=${ECR_REPO_HOST}/${ECR_REPO_NAME}
+
+# Amazon Bedrock Configuration
+export BEDROCK_MODEL_ID=us.anthropic.claude-3-7-sonnet-20250219-v1:0
+export BEDROCK_PODIDENTITY_IAM_ROLE=${CLUSTER_NAME}-bedrock-role
+
+# Agent Configuration (Optional)
+# export AGENT_CONFIG_FILE=/path/to/custom/agent.md  # Override default agent.md
 ```
 
 > **Note:** Make sure you have access to the Amazon Bedrock model `us.anthropic.claude-3-7-sonnet-20250219-v1:0` in your AWS account. You can change the model by updating the `BEDROCK_MODEL_ID` variable.
+
+---
+
+### Agent Configuration
+
+The weather agent's behavior is defined in the `agent.md` file, which contains:
+- **Agent Name**: Display name for the agent
+- **Agent Description**: Brief description of the agent's capabilities
+- **System Prompt**: Instructions that define the agent's behavior and expertise
+
+#### Default Configuration
+
+The default `agent.md` file configures a standard weather assistant:
+
+```markdown
+# Weather Assistant Agent Configuration
+
+## Agent Name
+Weather Assistant
+
+## Agent Description
+Weather Assistant that provides weather forecasts and alerts
+
+## System Prompt
+You are Weather Assistant that helps the user with forecasts or alerts:
+- Provide weather forecasts for US cities for the next 3 days if no specific period is mentioned
+- When returning forecasts, always include whether the weather is good for outdoor activities for each day
+- Provide information about weather alerts for US cities when requested
+```
+
+#### Custom Agent Configuration
+
+You can customize the agent by:
+
+1. **Modifying the default `agent.md` file** directly, or
+2. **Creating a custom configuration file** and setting the `AGENT_CONFIG_FILE` environment variable:
+
+```bash
+# Create custom agent configuration
+cat > custom_weather_agent.md << 'EOF'
+# Advanced Weather Specialist Configuration
+
+## Agent Name
+Advanced Weather Specialist
+
+## Agent Description
+Advanced Weather Specialist providing detailed meteorological analysis
+
+## System Prompt
+You are an Advanced Weather Specialist with expertise in meteorology:
+- Provide comprehensive weather forecasts for any location worldwide
+- Include detailed meteorological analysis with pressure systems and wind patterns
+- Offer specialized advice for aviation, marine, and agricultural weather needs
+- Always explain the reasoning behind your forecasts using meteorological principles
+EOF
+
+# Use custom configuration
+export AGENT_CONFIG_FILE=/path/to/custom_weather_agent.md
+```
+
+#### Configuration Loading
+
+The agent configuration is loaded at runtime with the following priority:
+1. **Custom file** specified by `AGENT_CONFIG_FILE` environment variable
+2. **Default file** `agent.md` in the project directory
+3. **Fallback file** `cloudbot.md` if `agent.md` is missing (featuring CloudBot - a cheerful AI agent perfect for workshop demos! 🌟)
+
+**Important**: An MD configuration file is **required**. The system will raise an error if no configuration file is found.
 
 ---
 
@@ -248,8 +320,8 @@ Link the IAM role to your Kubernetes service account:
 aws eks create-pod-identity-association \
   --cluster ${CLUSTER_NAME} \
   --role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/${BEDROCK_PODIDENTITY_IAM_ROLE} \
-  --namespace ${KUBERNETES_APP_NAMESPACE} \
-  --service-account ${KUBERNETES_APP_SERVICE_ACCOUNT}
+  --namespace ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
+  --service-account ${KUBERNETES_APP_WEATHER_AGENT_SERVICE_ACCOUNT}
 ```
 
 ---
@@ -293,7 +365,7 @@ Build the image for both AMD64 and ARM64 architectures:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t ${ECR_REPO_URI}:latest \
+  -t ${ECR_REPO_WEATHER_AGENT_URI}:latest \
   --push .
 ```
 
@@ -307,7 +379,7 @@ This command will:
 Confirm the image supports both architectures:
 
 ```bash
-docker manifest inspect ${ECR_REPO_URI}:latest
+docker manifest inspect ${ECR_REPO_WEATHER_AGENT_URI}:latest | grep -E "(amd64|arm64)"
 ```
 
 You should see entries for both `linux/amd64` and `linux/arm64`.
@@ -319,10 +391,10 @@ You should see entries for both `linux/amd64` and `linux/arm64`.
 Deploy the weather agent using Helm:
 
 ```bash
-helm upgrade ${KUBERNETES_APP_NAME} helm --install \
-  --namespace ${KUBERNETES_APP_NAMESPACE} --create-namespace
-  --set serviceAccount.name=${KUBERNETES_APP_SERVICE_ACCOUNT} \
-  --set image.repository=${ECR_REPO_URI} \
+helm upgrade ${KUBERNETES_APP_WEATHER_AGENT_NAME} helm --install \
+  --namespace ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} --create-namespace \
+  --set serviceAccount.name=${KUBERNETES_APP_WEATHER_AGENT_SERVICE_ACCOUNT} \
+  --set image.repository=${ECR_REPO_WEATHER_AGENT_URI} \
   --set image.pullPolicy=Always \
   --set image.tag=latest
 ```
@@ -330,7 +402,7 @@ helm upgrade ${KUBERNETES_APP_NAME} helm --install \
 This will:
 - Create the necessary Kubernetes resources
 - Deploy the weather agent with the correct service account
-- Configure the MCP server to run on port 8080
+- Expose the weathaer agent service in ports 8080(mcp), 9000(a2a), and 3000(rest)
 
 ---
 
@@ -341,8 +413,12 @@ This will:
 Verify the pod is running successfully:
 
 ```bash
-kubectl rollout status deployment/${KUBERNETES_APP_NAME}
-kubectl get pods -l app.kubernetes.io/instance=${KUBERNETES_APP_NAME}
+kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
+   rollout restart deployment/${KUBERNETES_APP_WEATHER_AGENT_NAME}
+kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
+   rollout status deployment/${KUBERNETES_APP_WEATHER_AGENT_NAME}
+kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
+  get pods -l app.kubernetes.io/instance=${KUBERNETES_APP_WEATHER_AGENT_NAME}
 ```
 > **Note:** Takes 3 minutes to provision a new node
 
@@ -358,22 +434,29 @@ weather-agent-xxxxxxxxx-xxxxx   1/1     Running   0          2m
 View the weather agent logs:
 
 ```bash
-kubectl logs deployment/${KUBERNETES_APP_NAME}
+kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
+  logs deployment/${KUBERNETES_APP_WEATHER_AGENT_NAME}
 ```
 
 You should see:
 ```
-INFO - Starting Weather Agent Dual Server...
-INFO - MCP Server will run on port 8080 with streamable-http transport
+INFO - Starting Weather Agent Triple Server...
+INFO - MCP Server will run on port 8080 with streamable-http
 INFO - A2A Server will run on port 9000
+INFO - REST API Server will run on port 3000
+INFO - Starting MCP Server
+INFO - Starting A2A Server
+INFO - Starting REST API Server
+INFO - All three servers started successfully!
 ```
 
 #### Step 3: Verify Service
 
-Check that the service endpoints for MCP(8080) and A2A(9000) is created:
+Check that the service endpoints for MCP(8080), A2A(9000) and REST(3000) is created:
 
 ```bash
-kubectl get ep ${KUBERNETES_APP_NAME}
+kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
+  get ep ${KUBERNETES_APP_WEATHER_AGENT_NAME}
 ```
 
 ---
@@ -382,166 +465,48 @@ kubectl get ep ${KUBERNETES_APP_NAME}
 
 The weather agent supports three protocols simultaneously. You can access it through port forwarding for development or test it using the provided test clients.
 
-#### Testing with Professional Test Clients
 
-We provide comprehensive test clients for all three protocols:
-
-**MCP Protocol Test Client:**
+#### Run Port forward to expose the agent locally
 ```bash
-# Start MCP server
-uv run mcp-server
-
-# Run MCP tests (6 comprehensive tests)
-uv run test_mcp_client.py
+# Port forward all three services
+kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
+  port-forward service/${KUBERNETES_APP_WEATHER_AGENT_NAME} 8080:mcp 9000:a2a 3000:rest
 ```
 
-**A2A Protocol Test Client:**
+#### Test the Agent with curl:
 ```bash
-# Start A2A server
-uv run a2a-server
-
-# Run A2A tests (6 comprehensive tests)
-uv run test_a2a_client.py
+# Chat with weather agent
+./test_e2e_rest_api_curl.sh
 ```
+The expected output:
+...
+═══════════════════════════════════════════════════════════════════════════════
+🌤️  Workshop Test Summary
+═══════════════════════════════════════════════════════════════════════════════
 
-**REST API Test Client:**
-```bash
-# Start REST API server
-uv run rest-api
+🎉 Weather Agent API testing completed!
+📊 Test Results:
+   • Health Check: Passed ✅
+   • Weather Forecasts: 5 queries tested 🌤️
+   • API Endpoints: REST API (port 3000) 🔗
 
-# Run REST API tests (9 comprehensive tests)
-uv run test_rest_api.py
-```
+🔧 Additional Testing Options:
+   • MCP Protocol: Use test_e2e_mcp.py (port 8080)
+   • A2A Protocol: Use test_e2e_a2a.py (port 9000)
+   • REST API:     Use test_e2e_rest_api.py   (port 3000)
 
-**Triple Server Testing:**
-```bash
-# Start all three servers simultaneously
-uv run agent
+✨ Workshop participants can now interact with the Weather Agent! ✨
+...
 
-# Test all protocols (in separate terminals)
-uv run test_mcp_client.py     # Tests MCP on port 8080
-uv run test_a2a_client.py     # Tests A2A on port 9000
-uv run test_rest_api.py       # Tests REST API on port 3000
-```
-
-#### Manual Access via Port Forwarding
-
-#### MCP: Port Forward (Development) as MCP server
-
-Forward the MCP server port to your local machine:
-
-```bash
-kubectl port-forward service/${KUBERNETES_APP_NAME} 8080:mcp
-```
-
-Now you can connect with the MCP client to `http://localhost:8080/mcp`.
-
-Use the MCP Inspector to test the connection:
-
-```bash
-npx @modelcontextprotocol/inspector
-```
-
-In the UI, use:
-- **Transport:** streamable-http
-- **URL:** http://localhost:8080/mcp
-
-
-#### A2A: Port Forward (Development) as A2A server
-
-Forward the A2A server port to your local machine:
-
-```bash
-kubectl port-forward service/${KUBERNETES_APP_NAME} 9000:a2a
-```
-
-Now you can connect with the A2A client to `http://localhost:9000`.
-
-Use the test a2a client script:
-```bash
-uv run test_a2a_client.py
-```
-
-#### REST API: Port Forward (Development) as REST API server
-
-Forward the REST API server port to your local machine:
-
-```bash
-kubectl port-forward service/${KUBERNETES_APP_NAME} 3000:rest
-```
-
-Now you can connect with HTTP clients to `http://localhost:3000`.
-
-Use the test REST API client script:
-```bash
-uv run test_rest_api.py
-```
-
-Or test with curl:
-```bash
-# Health check
-curl http://localhost:3000/health
-
-# Chat with weather assistant
-curl -X POST http://localhost:3000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What is the weather forecast for Seattle?"}'
-```
-
----
-
-### Clean Up Resources
-
-When you're done with the tutorial, clean up the resources to avoid charges:
-
-#### Step 1: Uninstall the Application
-
-```bash
-helm uninstall ${KUBERNETES_APP_NAME} \
-  --namespace ${KUBERNETES_APP_NAMESPACE}
-```
-
-#### Step 2: Delete ECR Repository
-
-```bash
-aws ecr delete-repository --repository-name ${ECR_REPO_NAME} --force
-```
-
-#### Step 3: Delete EKS Cluster
-
-```bash
-eksctl delete cluster --name ${CLUSTER_NAME}
-```
-
-#### Step 4: Delete IAM Role and Policies
-
-```bash
-# Delete the inline policy
-aws iam delete-role-policy \
-  --role-name ${BEDROCK_PODIDENTITY_IAM_ROLE} \
-  --policy-name BedrockAccess
-
-# Delete the IAM role
-aws iam delete-role --role-name ${BEDROCK_PODIDENTITY_IAM_ROLE}
-```
-
----
-
-### Testing Your Deployment
-
-Once your weather agent is deployed, you can verify all three protocols are working correctly using our comprehensive test clients.
 
 #### Automated Testing
 
 **Test All Protocols:**
 ```bash
-# Port forward all three services
-kubectl port-forward service/weather-agent 8080:8080 9000:9000 3000:3000
-
 # In separate terminals, run each test client:
-uv run test_mcp_client.py     # Tests MCP Protocol (6 tests)
-uv run test_a2a_client.py     # Tests A2A Protocol (6 tests)
-uv run test_rest_api.py       # Tests REST API (9 tests)
+uv run test_e2e_mcp.py        # Tests MCP Protocol (6 tests)
+uv run test_e2e_a2a.py        # Tests A2A Protocol (6 tests)
+uv run test_e2e_rest_api.py   # Tests REST API (9 tests)
 ```
 
 #### Test Client Features
@@ -577,27 +542,45 @@ Each test client provides:
 - History clearing functionality
 - Error handling (404, 400 responses)
 
-#### Manual Testing
-
-You can also test manually using the methods described in the [Access the Weather Agent](#access-the-weather-agent) section.
-
 ---
 
-### Troubleshooting
+### Clean Up Resources
 
-| Issue | Solution |
-|-------|----------|
-| `exec format error` | Ensure you built a multi-architecture image with `--platform linux/amd64,linux/arm64` |
-| Pod stuck in `CrashLoopBackOff` | Check logs with `kubectl logs <pod-name>` and verify Bedrock permissions |
-| Image pull errors | Verify ECR authentication and repository permissions |
-| Health check failures | Check that the MCP server is running on port 8080 |
+When you're done with the tutorial, clean up the resources to avoid charges:
 
-### Next Steps
+#### Step 1: Uninstall the Application
 
-- Integrate the weather agent with your applications using MCP
-- Set up monitoring and alerting for the deployment
-- Configure ingress for external access
-- Implement CI/CD pipelines for automated deployments
+```bash
+helm uninstall ${KUBERNETES_APP_WEATHER_AGENT_NAME} \
+  --namespace ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE}
+```
+
+#### Step 2: Delete ECR Repository
+
+```bash
+aws ecr delete-repository --repository-name ${ECR_REPO_NAME} --force
+```
+
+#### Step 3: Delete IAM Role and Policies
+
+```bash
+# Delete the inline policy
+aws iam delete-role-policy \
+  --role-name ${BEDROCK_PODIDENTITY_IAM_ROLE} \
+  --policy-name BedrockAccess
+
+# Delete the IAM role
+aws iam delete-role --role-name ${BEDROCK_PODIDENTITY_IAM_ROLE}
+```
+
+#### Step 4: Delete EKS Cluster
+
+```bash
+eksctl delete cluster --name ${CLUSTER_NAME}
+```
+
+
+---
 
 ## CONTRIBUTING
 
@@ -625,6 +608,11 @@ uv run interactive
 uv run mcp-server --transport streamable-http
 ```
 
+#### Run the mcp client
+```bash
+uv run test_e2e_mcp.py
+```
+
 Connect your mcp client such as `npx @modelcontextprotocol/inspector` then in the UI use streamable-http with `http://localhost:8080/mcp`
 
 #### Run as a2a server
@@ -632,14 +620,9 @@ Connect your mcp client such as `npx @modelcontextprotocol/inspector` then in th
 uv run a2a-server
 ```
 
-#### Run the mcp client
-```bash
-uv run test_mcp_client.py
-```
-
 #### Run the a2a client
 ```bash
-uv run test_a2a_client.py
+uv run test_e2e_a2a.py
 ```
 
 #### Run as REST API server
@@ -649,7 +632,7 @@ uv run rest-api
 
 #### Run the REST API client
 ```bash
-uv run test_rest_api.py
+uv run test_e2e_rest_api.py
 ```
 
 #### Running in a Container
@@ -676,49 +659,6 @@ agent interactive
 Type a question, to exit use `/quit`
 
 
-Run the agent as mcp server
-```bash
-docker run \
--v $HOME/.aws:/app/.aws \
--p 8080:8080 \
--e AWS_REGION=${AWS_REGION} \
--e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
--e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
--e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
--e DEBUG=1 \
-agent mcp-server
-```
-Connect your mcp client such as `npx @modelcontextprotocol/inspector` then in the UI use streamable-http with `http://localhost:8080/mcp`
-
-Run the agent as a2a server
-```bash
-docker run \
--v $HOME/.aws:/app/.aws \
--p 9000:9000 \
--e AWS_REGION=${AWS_REGION} \
--e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
--e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
--e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
--e DEBUG=1 \
-agent a2a-server
-```
-Then test in another terminal running `uv run test_a2a_client.py`
-
-Run the agent as REST API server
-```bash
-docker run \
--v $HOME/.aws:/app/.aws \
--p 3000:3000 \
--e AWS_REGION=${AWS_REGION} \
--e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
--e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
--e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
--e DEBUG=1 \
-agent rest-api
-```
-Then test in another terminal running `uv run test_rest_api.py`
-
-
 Run the agent as multi-server mcp, a2a, and REST API
 ```bash
 docker run \
@@ -733,11 +673,22 @@ docker run \
 -e DEBUG=1 \
 agent agent
 ```
+
 Use test clients to verify all three protocols:
 ```bash
-uv run test_mcp_client.py     # Tests MCP Protocol
-uv run test_a2a_client.py     # Tests A2A Protocol
-uv run test_rest_api.py       # Tests REST API
+uv run test_e2e_mcp.py        # Tests MCP Protocol
+uv run test_e2e_a2a.py        # Tests A2A Protocol
+uv run test_e2e_rest_api.py   # Tests REST API
 ```
 
-Or use individual tools: MCP Inspector, A2A client, or REST API client
+Now you can connect with the MCP client to `http://localhost:8080/mcp`.
+
+Use the MCP Inspector to test the connection:
+
+```bash
+npx @modelcontextprotocol/inspector
+```
+
+In the UI, use:
+- **Transport:** streamable-http
+- **URL:** http://localhost:8080/mcp

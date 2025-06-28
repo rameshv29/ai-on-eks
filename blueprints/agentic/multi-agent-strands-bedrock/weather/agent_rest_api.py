@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Weather Agent REST API Server
+AI Agent REST API Server
 
-Provides a REST API interface for the weather agent, allowing HTTP clients
-to interact with weather forecast and alert functionality with session state management.
+Provides a REST API interface for the AI agent, allowing HTTP clients
+to interact with the agent functionality with session state management.
 """
 
 import os
@@ -13,14 +13,14 @@ import time
 from typing import Dict, Any, Optional, List
 from functools import wraps
 from flask import Flask, request, jsonify, session
-from agent import get_weather_agent
+from agent import get_agent
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class WeatherRestAPI:
-    """REST API wrapper for the Weather Agent with session state management"""
+class AgentRestAPI:
+    """REST API wrapper for the AI Agent with session state management"""
 
     def __init__(self, host: str = "0.0.0.0", port: int = 3000):
         self.host = host
@@ -44,6 +44,13 @@ class WeatherRestAPI:
 
         # Store agent instances per session
         self.session_agents: Dict[str, Any] = {}
+
+        # Get agent configuration for service naming
+        try:
+            sample_agent = get_agent()
+            self.service_name = f"{sample_agent.name.lower().replace(' ', '-')}-rest-api" if sample_agent.name else "ai-agent-rest-api"
+        except Exception:
+            self.service_name = "ai-agent-rest-api"
 
         self._setup_routes()
 
@@ -77,7 +84,7 @@ class WeatherRestAPI:
         if session_id not in self.session_agents:
             logger.info(f"Creating new agent for session: {session_id}")
             try:
-                self.session_agents[session_id] = get_weather_agent()
+                self.session_agents[session_id] = get_agent()
             except Exception as e:
                 logger.error(f"Failed to create agent for session {session_id}: {str(e)}")
                 raise
@@ -144,7 +151,7 @@ class WeatherRestAPI:
             """Health check endpoint"""
             return jsonify({
                 "status": "healthy",
-                "service": "weather-agent-rest-api",
+                "service": self.service_name,
                 "version": "0.2.0",
                 "features": {
                     "session_management": True,
@@ -159,7 +166,7 @@ class WeatherRestAPI:
         @self.app.route('/chat', methods=['POST'])
         @self._require_api_key
         def chat():
-            """Chat with the weather assistant with session state"""
+            """Chat with the AI assistant with session state"""
             try:
                 # Validate request
                 if not request.is_json:
@@ -307,7 +314,8 @@ class WeatherRestAPI:
     def run(self, debug: bool = False):
         """Start the REST API server"""
         auth_status = "enabled" if self.require_api_key else "disabled"
-        logger.info(f"Starting Weather Agent REST API server on {self.host}:{self.port}")
+        logger.info(f"Starting AI Agent REST API server on {self.host}:{self.port}")
+        logger.info(f"Service name: {self.service_name}")
         logger.info(f"API Key authentication: {auth_status}")
         logger.info(f"Session management: enabled")
         logger.info(f"Max conversation history: {os.getenv('MAX_CONVERSATION_HISTORY', '20')}")
@@ -328,7 +336,7 @@ def rest_api_agent():
     debug = os.getenv("DEBUG", "").lower() in ("1", "true", "yes")
 
     # Create and start the server
-    server = WeatherRestAPI(host=host, port=port)
+    server = AgentRestAPI(host=host, port=port)
     server.run(debug=debug)
 
 
