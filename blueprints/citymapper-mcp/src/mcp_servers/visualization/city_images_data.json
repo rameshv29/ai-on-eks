@@ -1,0 +1,169 @@
+{
+  "cities": {
+    "san_francisco": {
+      "name": "San Francisco",
+      "destination": "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?ixlib=rb-4.0.3",
+      "description": "A hilly city known for the Golden Gate Bridge, cable cars, and Victorian houses.",
+      "country": "United States",
+      "places": {
+        "Golden Gate Bridge": "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?ixlib=rb-4.0.3",
+        "Fisherman's Wharf": "https://images.unsplash.com/photo-1569959220744-ff553533f492?ixlib=rb-4.0.3",
+        "Alcatraz Island": "https://images.unsplash.com/photo-1541464522988-31b420f688b9?ixlib=rb-4.0.3",
+        "Golden Gate Park": "https://images.unsplash.com/photo-1449034446853-66c86144b0ad?ixlib=rb-4.0.3",
+        "Union Square": "https://images.unsplash.com/photo-1610312278520-bcc893a3ff1d?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1526761122248-c31c93f8b2b9?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1592210454359-9043f067919b?ixlib=rb-4.0.3"
+    },
+    "new_york": {
+      "name": "New York",
+      "destination": "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.0.3",
+      "description": "The most populous city in the US, known for its iconic skyline and cultural diversity.",
+      "country": "United States",
+      "places": {
+        "Times Square": "https://images.unsplash.com/photo-1534430480872-3498386e7856?ixlib=rb-4.0.3",
+        "Central Park": "https://images.unsplash.com/photo-1534430480872-3498386e7856?ixlib=rb-4.0.3",
+        "Empire State Building": "https://images.unsplash.com/photo-1546436836-07a91091f160?ixlib=rb-4.0.3",
+        "Statue of Liberty": "https://images.unsplash.com/photo-1605130284535-11dd9eedc58a?ixlib=rb-4.0.3",
+        "Brooklyn Bridge": "https://images.unsplash.com/photo-1541870730196-cd1efcbf5649?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1518235506717-e1ed3306a89b?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?ixlib=rb-4.0.3"
+    },
+    "london": {
+      "name": "London",
+      "destination": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-4.0.3",
+      "description": "The capital of England, known for its historic landmarks, museums, and diverse culture.",
+      "country": "United Kingdom",
+      "places": {
+        "Big Ben": "https://images.unsplash.com/photo-1529655683826-aba9b3e77383?ixlib=rb-4.0.3",
+        "Tower of London": "https://images.unsplash.com/photo-1520986606214-8b456906c813?ixlib=rb-4.0.3",
+        "Buckingham Palace": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3",
+        "British Museum": "https://images.unsplash.com/photo-1574784619102-f7e342f5fac1?ixlib=rb-4.0.3",
+        "London Eye": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1589028699639-e42eae1b7809?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1516912481808-3406841bd33c?ixlib=rb-4.0.3"
+    },
+    "paris": {
+      "name": "Paris",
+      "destination": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3",
+      "description": "The capital of France, known for the Eiffel Tower, art, fashion, and cuisine.",
+      "country": "France",
+      "places": {
+        "Eiffel Tower": "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixlib=rb-4.0.3",
+        "Louvre Museum": "https://images.unsplash.com/photo-1565099824688-e93eb20fe622?ixlib=rb-4.0.3",
+        "Notre-Dame Cathedral": "https://images.unsplash.com/photo-1478391679764-b2d8b3cd1e94?ixlib=rb-4.0.3",
+        "Arc de Triomphe": "https://images.unsplash.com/photo-1522093007474-d86e9bf7ba6f?ixlib=rb-4.0.3",
+        "Montmartre": "https://images.unsplash.com/photo-1551634979-2b11f8c946fe?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1551634979-2b11f8c946fe?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1558486012-817176f84c6d?ixlib=rb-4.0.3"
+    },
+    "tokyo": {
+      "name": "Tokyo",
+      "destination": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3",
+      "description": "Japan's busy capital, mixing ultramodern and traditional aspects, from neon-lit skyscrapers to historic temples.",
+      "country": "Japan",
+      "places": {
+        "Tokyo Tower": "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?ixlib=rb-4.0.3",
+        "Shibuya Crossing": "https://images.unsplash.com/photo-1542051841857-5f90071e7989?ixlib=rb-4.0.3",
+        "Senso-ji Temple": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-4.0.3",
+        "Meiji Shrine": "https://images.unsplash.com/photo-1583084647979-b53fbbc15e79?ixlib=rb-4.0.3",
+        "Shinjuku Gyoen": "https://images.unsplash.com/photo-1557409518-691ebcd96022?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1551641506-ee5bf4cb45f1?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1551641506-ee5bf4cb45f1?ixlib=rb-4.0.3"
+    },
+    "sydney": {
+      "name": "Sydney",
+      "destination": "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?ixlib=rb-4.0.3",
+      "description": "Australia's largest city, famous for its Opera House, harbor, and beautiful beaches.",
+      "country": "Australia",
+      "places": {
+        "Sydney Opera House": "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?ixlib=rb-4.0.3",
+        "Sydney Harbour Bridge": "https://images.unsplash.com/photo-1524293581917-878a6d017c71?ixlib=rb-4.0.3",
+        "Bondi Beach": "https://images.unsplash.com/photo-1547531455-c20b677ded4b?ixlib=rb-4.0.3",
+        "Darling Harbour": "https://images.unsplash.com/photo-1590716209211-ea74d5e9a6cb?ixlib=rb-4.0.3",
+        "Royal Botanic Garden": "https://images.unsplash.com/photo-1528072164453-f4e8ef0d475a?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?ixlib=rb-4.0.3"
+    },
+    "rome": {
+      "name": "Rome",
+      "destination": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3",
+      "description": "Italy's capital, known for its ancient ruins, art, and vibrant street life.",
+      "country": "Italy",
+      "places": {
+        "Colosseum": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3",
+        "Roman Forum": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3",
+        "Vatican City": "https://images.unsplash.com/photo-1531572753322-ad063cecc140?ixlib=rb-4.0.3",
+        "Trevi Fountain": "https://images.unsplash.com/photo-1525874684015-58379d421a52?ixlib=rb-4.0.3",
+        "Spanish Steps": "https://images.unsplash.com/photo-1558102400-89be37850574?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3"
+    },
+    "dubai": {
+      "name": "Dubai",
+      "destination": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3",
+      "description": "A city in the UAE known for luxury shopping, ultramodern architecture, and a lively nightlife scene.",
+      "country": "United Arab Emirates",
+      "places": {
+        "Burj Khalifa": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3",
+        "Dubai Mall": "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?ixlib=rb-4.0.3",
+        "Palm Jumeirah": "https://images.unsplash.com/photo-1518684079-3c830dcef090?ixlib=rb-4.0.3",
+        "Dubai Marina": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3",
+        "Burj Al Arab": "https://images.unsplash.com/photo-1518684079-3c830dcef090?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3"
+    },
+    "barcelona": {
+      "name": "Barcelona",
+      "destination": "https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.0.3",
+      "description": "A cosmopolitan city in Spain known for its art and architecture, particularly the works of Antoni Gaudí.",
+      "country": "Spain",
+      "places": {
+        "Sagrada Familia": "https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.0.3",
+        "Park Güell": "https://images.unsplash.com/photo-1464790719320-516ecd75af6c?ixlib=rb-4.0.3",
+        "Casa Batlló": "https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.0.3",
+        "La Rambla": "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?ixlib=rb-4.0.3",
+        "Gothic Quarter": "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.0.3"
+    },
+    "singapore": {
+      "name": "Singapore",
+      "destination": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3",
+      "description": "A global financial center with a tropical climate and multicultural population.",
+      "country": "Singapore",
+      "places": {
+        "Marina Bay Sands": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3",
+        "Gardens by the Bay": "https://images.unsplash.com/photo-1506351421178-63b52a2d2562?ixlib=rb-4.0.3",
+        "Sentosa Island": "https://images.unsplash.com/photo-1565967511849-76a60a516170?ixlib=rb-4.0.3",
+        "Singapore Zoo": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3",
+        "Merlion Park": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-4.0.3"
+    },
+    "rio_de_janeiro": {
+      "name": "Rio de Janeiro",
+      "destination": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3",
+      "description": "A huge seaside city in Brazil, famous for its Copacabana beach, Christ the Redeemer statue, and annual carnival.",
+      "country": "Brazil",
+      "places": {
+        "Christ the Redeemer": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3",
+        "Copacabana Beach": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3",
+        "Sugarloaf Mountain": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3",
+        "Ipanema Beach": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3",
+        "Maracanã Stadium": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3"
+      },
+      "map": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3",
+      "weather_chart": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+# Core MCP and Agent Dependencies
+strands-agents>=0.1.0
+strands-agents-tools>=0.1.0
+mcp>=1.9.4
+mcp-server>=0.1.4
+
+# Web Framework Dependencies
+fastapi==0.115.12
+uvicorn>=0.23.1
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+requests>=2.28.2
+
+# AWS Dependencies
+boto3>=1.26.0
+botocore>=1.29.0
+
+# Additional Dependencies for Travel Planner
+python-dateutil>=2.8.0

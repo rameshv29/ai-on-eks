@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "travel": {
+      "command": "python",
+      "args": ["src/mcp_servers/travel/server.py", "http://localhost:8001/mcp"]
+    },
+    "weather": {
+      "command": "python",
+      "args": ["src/mcp_servers/weather/server.py", "http://localhost:8002/mcp"]
+    },
+    "food": {
+      "command": "python",
+      "args": ["src/mcp_servers/food/server.py", "http://localhost:8003/mcp"]
+    },
+    "activities": {
+      "command": "python",
+      "args": ["src/mcp_servers/activities/server.py", "http://localhost:8004/mcp"]
+    },
+    "maps": {
+      "command": "python",
+      "args": ["src/mcp_servers/maps/server.py", "http://localhost:8005/mcp"]
+    },
+    "visualization": {
+      "command": "python",
+      "args": ["src/mcp_servers/visualization/server.py", "http://localhost:8006/mcp"]
+    }
+  }
+}

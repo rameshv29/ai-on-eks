@@ -1,0 +1,216 @@
+{
+  "destinations": {
+    "san_francisco": {
+      "name": "San Francisco",
+      "country": "United States",
+      "description": "A hilly city known for the Golden Gate Bridge, cable cars, and Victorian houses.",
+      "popular_areas": ["Fisherman's Wharf", "Golden Gate Park", "Chinatown", "Mission District", "Union Square"],
+      "indoor_activities": [
+        {
+          "id": "sfmoma",
+          "name": "SFMOMA",
+          "description": "Modern art museum with works by famous artists.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "art"],
+          "nearby_dining": [
+            {"name": "The Museum Cafe", "type": "casual", "distance": "0.1 miles", "cuisine": "American"},
+            {"name": "Benu", "type": "upscale", "distance": "0.3 miles", "cuisine": "Asian Fusion"}
+          ]
+        },
+        {
+          "id": "exploratorium",
+          "name": "Exploratorium",
+          "description": "Interactive science museum on the Embarcadero.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "science"],
+          "nearby_dining": [
+            {"name": "Pier Market Seafood", "type": "casual", "distance": "0.2 miles", "cuisine": "Seafood"},
+            {"name": "Waterbar", "type": "upscale", "distance": "0.4 miles", "cuisine": "Seafood"}
+          ]
+        },
+        {
+          "id": "de_young_museum",
+          "name": "de Young Museum",
+          "description": "Fine arts museum in Golden Gate Park.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "art"],
+          "nearby_dining": [
+            {"name": "Park Chalet", "type": "casual", "distance": "0.5 miles", "cuisine": "American"},
+            {"name": "Beach Chalet", "type": "upscale", "distance": "0.6 miles", "cuisine": "American"}
+          ]
+        },
+        {
+          "id": "alcatraz",
+          "name": "Alcatraz Island",
+          "description": "Historic prison with audio tour.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["culture", "history", "tour"],
+          "nearby_dining": [
+            {"name": "Pier 33 Cafe", "type": "casual", "distance": "0.1 miles", "cuisine": "American"},
+            {"name": "Fisherman's Wharf Restaurants", "type": "casual", "distance": "0.3 miles", "cuisine": "Seafood"}
+          ]
+        },
+        {
+          "id": "palace_fine_arts",
+          "name": "Palace of Fine Arts",
+          "description": "Monumental structure built for 1915 exposition.",
+          "duration": "short",
+          "cost": "free",
+          "categories": ["culture", "architecture", "photography"],
+          "nearby_dining": [
+            {"name": "Marina District Cafes", "type": "casual", "distance": "0.2 miles", "cuisine": "Various"},
+            {"name": "Greens Restaurant", "type": "upscale", "distance": "0.4 miles", "cuisine": "Vegetarian"}
+          ]
+        }
+      ],
+      "outdoor_activities": [
+        {
+          "id": "golden_gate_park",
+          "name": "Golden Gate Park",
+          "description": "A large urban park with gardens, museums, and trails.",
+          "duration": "half-day",
+          "cost": "low",
+          "categories": ["nature", "outdoor", "park"],
+          "nearby_dining": [
+            {"name": "Park Chalet", "type": "casual", "distance": "0.2 miles", "cuisine": "American"},
+            {"name": "Beach Chalet", "type": "upscale", "distance": "0.3 miles", "cuisine": "American"}
+          ]
+        },
+        {
+          "id": "lands_end_trail",
+          "name": "Lands End Trail",
+          "description": "Scenic coastal trail with views of the Golden Gate Bridge.",
+          "duration": "half-day",
+          "cost": "free",
+          "categories": ["nature", "hiking", "outdoor"],
+          "nearby_dining": [
+            {"name": "Cliff House", "type": "casual", "distance": "0.1 miles", "cuisine": "American"},
+            {"name": "Sutro's at the Cliff House", "type": "upscale", "distance": "0.1 miles", "cuisine": "Seafood"}
+          ]
+        },
+        {
+          "id": "muir_woods",
+          "name": "Muir Woods",
+          "description": "Ancient redwood forest with hiking trails.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["nature", "hiking", "outdoor"],
+          "nearby_dining": [
+            {"name": "Muir Woods Trading Company", "type": "casual", "distance": "0.1 miles", "cuisine": "Cafe"},
+            {"name": "Mill Valley Restaurants", "type": "various", "distance": "3 miles", "cuisine": "Various"}
+          ]
+        },
+        {
+          "id": "twin_peaks",
+          "name": "Twin Peaks",
+          "description": "Panoramic views of the city from these famous hills.",
+          "duration": "short",
+          "cost": "free",
+          "categories": ["nature", "viewpoint", "outdoor"],
+          "nearby_dining": [
+            {"name": "Castro District Cafes", "type": "casual", "distance": "1 mile", "cuisine": "Various"},
+            {"name": "Mission District Restaurants", "type": "various", "distance": "1.5 miles", "cuisine": "Various"}
+          ]
+        },
+        {
+          "id": "angel_island",
+          "name": "Angel Island State Park",
+          "description": "Island in the bay with hiking trails and historic sites.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["nature", "hiking", "history"],
+          "nearby_dining": [
+            {"name": "Angel Island Cafe", "type": "casual", "distance": "0.1 miles", "cuisine": "American"},
+            {"name": "Tiburon Restaurants", "type": "various", "distance": "ferry ride", "cuisine": "Various"}
+          ]
+        },
+        {
+          "id": "golden_gate_bridge",
+          "name": "Golden Gate Bridge",
+          "description": "Iconic suspension bridge with walking paths and viewpoints.",
+          "duration": "half-day",
+          "cost": "free",
+          "categories": ["landmark", "photography", "outdoor"],
+          "nearby_dining": [
+            {"name": "Bridge Cafe", "type": "casual", "distance": "0.2 miles", "cuisine": "American"},
+            {"name": "Presidio Social Club", "type": "upscale", "distance": "1 mile", "cuisine": "American"}
+          ]
+        },
+        {
+          "id": "fishermans_wharf",
+          "name": "Fisherman's Wharf",
+          "description": "Waterfront area with shops, restaurants, and sea lions.",
+          "duration": "half-day",
+          "cost": "low",
+          "categories": ["entertainment", "shopping", "outdoor"],
+          "nearby_dining": [
+            {"name": "Pier Market Seafood", "type": "casual", "distance": "0.1 miles", "cuisine": "Seafood"},
+            {"name": "Scoma's", "type": "upscale", "distance": "0.2 miles", "cuisine": "Seafood"}
+          ]
+        }
+      ]
+    },
+    "new_york": {
+      "name": "New York City",
+      "country": "United States",
+      "description": "The most populous city in the US, known for its iconic skyline and cultural diversity.",
+      "popular_areas": ["Manhattan", "Brooklyn", "Queens", "The Bronx", "Staten Island"],
+      "indoor_activities": [
+        {
+          "id": "met_museum",
+          "name": "Metropolitan Museum of Art",
+          "description": "One of the world's largest and most prestigious art museums.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "art"],
+          "nearby_dining": [
+            {"name": "The Met Dining Room", "type": "upscale", "distance": "0.1 miles", "cuisine": "American"},
+            {"name": "Upper East Side Cafes", "type": "casual", "distance": "0.2 miles", "cuisine": "Various"}
+          ]
+        },
+        {
+          "id": "broadway_show",
+          "name": "Broadway Theater",
+          "description": "World-famous theater district with musicals and plays.",
+          "duration": "evening",
+          "cost": "high",
+          "categories": ["culture", "entertainment", "theater"],
+          "nearby_dining": [
+            {"name": "Times Square Restaurants", "type": "various", "distance": "0.1 miles", "cuisine": "Various"},
+            {"name": "Hell's Kitchen Eateries", "type": "various", "distance": "0.3 miles", "cuisine": "Various"}
+          ]
+        }
+      ],
+      "outdoor_activities": [
+        {
+          "id": "central_park",
+          "name": "Central Park",
+          "description": "Large public park in Manhattan with lakes, trails, and attractions.",
+          "duration": "half-day",
+          "cost": "free",
+          "categories": ["nature", "outdoor", "park"],
+          "nearby_dining": [
+            {"name": "Tavern on the Green", "type": "upscale", "distance": "0.1 miles", "cuisine": "American"},
+            {"name": "The Loeb Boathouse", "type": "upscale", "distance": "0.2 miles", "cuisine": "Seafood"}
+          ]
+        },
+        {
+          "id": "brooklyn_bridge",
+          "name": "Brooklyn Bridge",
+          "description": "Historic bridge with pedestrian walkway and city views.",
+          "duration": "short",
+          "cost": "free",
+          "categories": ["landmark", "photography", "outdoor"],
+          "nearby_dining": [
+            {"name": "Brooklyn Bridge Park Vendors", "type": "casual", "distance": "0.2 miles", "cuisine": "Various"},
+            {"name": "DUMBO Restaurants", "type": "various", "distance": "0.3 miles", "cuisine": "Various"}
+          ]
+        }
+      ]
+    }
+  }
+}

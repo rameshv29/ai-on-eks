@@ -1,0 +1,125 @@
+{
+  "destinations": {
+    "san_francisco": {
+      "name": "San Francisco",
+      "country": "United States",
+      "description": "A hilly city known for the Golden Gate Bridge, cable cars, and Victorian houses.",
+      "popular_areas": ["Fisherman's Wharf", "Golden Gate Park", "Chinatown", "Mission District", "Union Square"],
+      "accommodations": [
+        {"name": "Hotel Nikko", "type": "Luxury", "price_range": "$$$", "location": "Union Square"},
+        {"name": "The Mosser", "type": "Mid-range", "price_range": "$$", "location": "SoMa"},
+        {"name": "HI San Francisco Downtown Hostel", "type": "Budget", "price_range": "$", "location": "Downtown"}
+      ]
+    },
+    "new_york": {
+      "name": "New York City",
+      "country": "United States",
+      "description": "The most populous city in the US, known for its iconic skyline and cultural diversity.",
+      "popular_areas": ["Manhattan", "Brooklyn", "Queens", "The Bronx", "Staten Island"],
+      "accommodations": [
+        {"name": "The Plaza", "type": "Luxury", "price_range": "$$$", "location": "Midtown"},
+        {"name": "Pod 51 Hotel", "type": "Mid-range", "price_range": "$$", "location": "Midtown East"},
+        {"name": "HI NYC Hostel", "type": "Budget", "price_range": "$", "location": "Upper West Side"}
+      ]
+    },
+    "london": {
+      "name": "London",
+      "country": "United Kingdom",
+      "description": "The capital of England, known for its historic landmarks, museums, and diverse culture.",
+      "popular_areas": ["Westminster", "City of London", "Camden", "Notting Hill", "Greenwich"],
+      "accommodations": [
+        {"name": "The Savoy", "type": "Luxury", "price_range": "$$$", "location": "Strand"},
+        {"name": "Premier Inn London", "type": "Mid-range", "price_range": "$$", "location": "Various Locations"},
+        {"name": "YHA London Central", "type": "Budget", "price_range": "$", "location": "Bloomsbury"}
+      ]
+    },
+    "paris": {
+      "name": "Paris",
+      "country": "France",
+      "description": "The capital of France, known for the Eiffel Tower, art, fashion, and cuisine.",
+      "popular_areas": ["Le Marais", "Montmartre", "Latin Quarter", "Champs-Élysées", "Saint-Germain-des-Prés"],
+      "accommodations": [
+        {"name": "Hôtel Plaza Athénée", "type": "Luxury", "price_range": "$$$", "location": "8th Arrondissement"},
+        {"name": "Hôtel Fabric", "type": "Mid-range", "price_range": "$$", "location": "11th Arrondissement"},
+        {"name": "Generator Paris", "type": "Budget", "price_range": "$", "location": "10th Arrondissement"}
+      ]
+    },
+    "tokyo": {
+      "name": "Tokyo",
+      "country": "Japan",
+      "description": "Japan's busy capital, mixing ultramodern and traditional aspects, from neon-lit skyscrapers to historic temples.",
+      "popular_areas": ["Shinjuku", "Shibuya", "Ginza", "Asakusa", "Akihabara"],
+      "accommodations": [
+        {"name": "Park Hyatt Tokyo", "type": "Luxury", "price_range": "$$$", "location": "Shinjuku"},
+        {"name": "Tokyu Stay Shinjuku", "type": "Mid-range", "price_range": "$$", "location": "Shinjuku"},
+        {"name": "Sakura Hotel Ikebukuro", "type": "Budget", "price_range": "$", "location": "Ikebukuro"}
+      ]
+    },
+    "sydney": {
+      "name": "Sydney",
+      "country": "Australia",
+      "description": "Australia's largest city, famous for its Opera House, harbor, and beautiful beaches.",
+      "popular_areas": ["Sydney CBD", "Darling Harbour", "Bondi Beach", "The Rocks", "Manly"],
+      "accommodations": [
+        {"name": "Park Hyatt Sydney", "type": "Luxury", "price_range": "$$$", "location": "The Rocks"},
+        {"name": "Meriton Suites", "type": "Mid-range", "price_range": "$$", "location": "Various Locations"},
+        {"name": "Sydney Harbour YHA", "type": "Budget", "price_range": "$", "location": "The Rocks"}
+      ]
+    },
+    "rome": {
+      "name": "Rome",
+      "country": "Italy",
+      "description": "Italy's capital, known for its ancient ruins, art, and vibrant street life.",
+      "popular_areas": ["Historic Center", "Vatican City", "Trastevere", "Monti", "Testaccio"],
+      "accommodations": [
+        {"name": "Hotel Hassler", "type": "Luxury", "price_range": "$$$", "location": "Spanish Steps"},
+        {"name": "Hotel Artemide", "type": "Mid-range", "price_range": "$$", "location": "Via Nazionale"},
+        {"name": "The Yellow", "type": "Budget", "price_range": "$", "location": "Esquilino"}
+      ]
+    },
+    "dubai": {
+      "name": "Dubai",
+      "country": "United Arab Emirates",
+      "description": "A city in the UAE known for luxury shopping, ultramodern architecture, and a lively nightlife scene.",
+      "popular_areas": ["Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Deira", "Jumeirah Beach"],
+      "accommodations": [
+        {"name": "Burj Al Arab", "type": "Luxury", "price_range": "$$$", "location": "Jumeirah"},
+        {"name": "Rove Downtown", "type": "Mid-range", "price_range": "$$", "location": "Downtown Dubai"},
+        {"name": "Ibis Al Barsha", "type": "Budget", "price_range": "$", "location": "Al Barsha"}
+      ]
+    },
+    "barcelona": {
+      "name": "Barcelona",
+      "country": "Spain",
+      "description": "A cosmopolitan city in Spain known for its art and architecture, particularly the works of Antoni Gaudí.",
+      "popular_areas": ["Gothic Quarter", "Eixample", "El Born", "Barceloneta", "Gràcia"],
+      "accommodations": [
+        {"name": "Hotel Arts Barcelona", "type": "Luxury", "price_range": "$$$", "location": "Olympic Port"},
+        {"name": "H10 Metropolitan", "type": "Mid-range", "price_range": "$$", "location": "Eixample"},
+        {"name": "Generator Barcelona", "type": "Budget", "price_range": "$", "location": "Gràcia"}
+      ]
+    },
+    "singapore": {
+      "name": "Singapore",
+      "country": "Singapore",
+      "description": "A global financial center with a tropical climate and multicultural population.",
+      "popular_areas": ["Marina Bay", "Orchard Road", "Chinatown", "Little India", "Sentosa Island"],
+      "accommodations": [
+        {"name": "Marina Bay Sands", "type": "Luxury", "price_range": "$$$", "location": "Marina Bay"},
+        {"name": "Hotel G Singapore", "type": "Mid-range", "price_range": "$$", "location": "Bugis"},
+        {"name": "Footprints Hostel", "type": "Budget", "price_range": "$", "location": "Little India"}
+      ]
+    },
+    "rio_de_janeiro": {
+      "name": "Rio de Janeiro",
+      "country": "Brazil",
+      "description": "A huge seaside city in Brazil, famous for its Copacabana beach, Christ the Redeemer statue, and annual carnival.",
+      "popular_areas": ["Copacabana", "Ipanema", "Leblon", "Santa Teresa", "Lapa"],
+      "accommodations": [
+        {"name": "Belmond Copacabana Palace", "type": "Luxury", "price_range": "$$$", "location": "Copacabana"},
+        {"name": "Windsor Atlantica", "type": "Mid-range", "price_range": "$$", "location": "Copacabana"},
+        {"name": "Selina Lapa", "type": "Budget", "price_range": "$", "location": "Lapa"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,102 @@
+services:
+  # DynamoDB Local for data storage
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+    networks:
+      - citymapper-network
+
+  # Consolidated Activities Server (Travel + Activities + minimal Food)
+  activities-server:
+    build:
+      context: .
+      dockerfile: src/mcp_servers/activities/Dockerfile
+    ports:
+      - "8004:8004"
+    networks:
+      - citymapper-network
+    depends_on:
+      - dynamodb-local
+    environment:
+      - DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-citymapper-travel-plans-default}
+    volumes:
+      - ~/.aws:/root/.aws:ro  # Mount AWS credentials
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    command: ["python", "consolidated_server.py"]
+
+  # Mapper Service - Route optimization and HTML generation
+  mapper-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.mapper
+    ports:
+      - "8007:8007"
+    networks:
+      - citymapper-network
+    depends_on:
+      - dynamodb-local
+      - activities-server
+    environment:
+      - DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - ACTIVITIES_SERVICE_URL=http://activities-server:8004
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-citymapper-travel-plans-default}
+    volumes:
+      - ./generated_plans:/app/generated_plans
+      - ~/.aws:/root/.aws:ro  # Mount AWS credentials
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.path.append('src'); from utils.dynamodb_utils import health_check; exit(0 if health_check() else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    command: ["python", "src/mcp_servers/mapper/server.py"]
+
+  # Demo Service - AI-powered travel planning
+  demo:
+    build:
+      context: .
+      dockerfile: tests/demo/Dockerfile
+    ports:
+      - "6001:5001"
+    networks:
+      - citymapper-network
+    depends_on:
+      - dynamodb-local
+      - activities-server
+      - mapper-service
+    environment:
+      - ACTIVITIES_SERVER=activities-server
+      - MAPPER_SERVICE=mapper-service
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+      - AWS_DEFAULT_REGION=${AWS_REGION:-us-west-2}
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - BEDROCK_REGION=${AWS_REGION:-us-west-2}
+    volumes:
+      - ~/.aws:/home/mcpclient/.aws:ro  # Mount AWS credentials to the correct user directory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  citymapper-network:
+    driver: bridge

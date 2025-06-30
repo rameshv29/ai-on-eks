@@ -1,0 +1,219 @@
+{
+  "cities": {
+    "san_francisco": {
+      "name": "San Francisco",
+      "activities": [
+        {
+          "id": "golden_gate_park",
+          "name": "Golden Gate Park",
+          "description": "A large urban park with gardens, museums, and trails.",
+          "duration": "half-day",
+          "cost": "low",
+          "categories": ["nature", "outdoor", "park"]
+        },
+        {
+          "id": "lands_end_trail",
+          "name": "Lands End Trail",
+          "description": "Scenic coastal trail with views of the Golden Gate Bridge.",
+          "duration": "half-day",
+          "cost": "free",
+          "categories": ["nature", "hiking", "outdoor"]
+        },
+        {
+          "id": "muir_woods",
+          "name": "Muir Woods",
+          "description": "Ancient redwood forest with hiking trails.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["nature", "hiking", "outdoor"]
+        },
+        {
+          "id": "twin_peaks",
+          "name": "Twin Peaks",
+          "description": "Panoramic views of the city from these famous hills.",
+          "duration": "short",
+          "cost": "free",
+          "categories": ["nature", "viewpoint", "outdoor"]
+        },
+        {
+          "id": "angel_island",
+          "name": "Angel Island State Park",
+          "description": "Island in the bay with hiking trails and historic sites.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["nature", "hiking", "history"]
+        },
+        {
+          "id": "sfmoma",
+          "name": "SFMOMA",
+          "description": "Modern art museum with works by famous artists.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "art"]
+        },
+        {
+          "id": "alcatraz",
+          "name": "Alcatraz Island",
+          "description": "Historic prison with audio tour.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["culture", "history", "tour"]
+        },
+        {
+          "id": "de_young_museum",
+          "name": "de Young Museum",
+          "description": "Fine arts museum in Golden Gate Park.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "art"]
+        },
+        {
+          "id": "exploratorium",
+          "name": "Exploratorium",
+          "description": "Interactive science museum on the Embarcadero.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "science"]
+        },
+        {
+          "id": "palace_fine_arts",
+          "name": "Palace of Fine Arts",
+          "description": "Monumental structure originally built for the 1915 Panama-Pacific Exposition.",
+          "duration": "short",
+          "cost": "free",
+          "categories": ["culture", "architecture", "landmark"]
+        },
+        {
+          "id": "fishermans_wharf",
+          "name": "Fisherman's Wharf",
+          "description": "Popular waterfront area with shops and restaurants.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["entertainment", "shopping", "food"]
+        },
+        {
+          "id": "cable_car",
+          "name": "Cable Car Ride",
+          "description": "Iconic San Francisco experience.",
+          "duration": "short",
+          "cost": "low",
+          "categories": ["entertainment", "transport", "landmark"]
+        },
+        {
+          "id": "pier_39",
+          "name": "Pier 39",
+          "description": "Shopping center and tourist attraction with sea lion viewing.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["entertainment", "shopping", "wildlife"]
+        },
+        {
+          "id": "ghirardelli_square",
+          "name": "Ghirardelli Square",
+          "description": "Historic chocolate factory converted into shops and restaurants.",
+          "duration": "short",
+          "cost": "medium",
+          "categories": ["entertainment", "shopping", "food"]
+        },
+        {
+          "id": "oracle_park",
+          "name": "Oracle Park",
+          "description": "Waterfront baseball stadium, home of the San Francisco Giants.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["entertainment", "sports", "landmark"]
+        }
+      ]
+    },
+    "new_york": {
+      "name": "New York",
+      "activities": [
+        {
+          "id": "central_park",
+          "name": "Central Park",
+          "description": "Massive urban park with lakes, trails, and attractions.",
+          "duration": "half-day",
+          "cost": "free",
+          "categories": ["nature", "outdoor", "park"]
+        },
+        {
+          "id": "high_line",
+          "name": "High Line",
+          "description": "Elevated linear park built on a former railroad track.",
+          "duration": "half-day",
+          "cost": "free",
+          "categories": ["nature", "outdoor", "park"]
+        },
+        {
+          "id": "brooklyn_botanic",
+          "name": "Brooklyn Botanic Garden",
+          "description": "52-acre garden with diverse plant collections.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["nature", "garden", "outdoor"]
+        },
+        {
+          "id": "met_museum",
+          "name": "Metropolitan Museum of Art",
+          "description": "One of the world's largest art museums.",
+          "duration": "full-day",
+          "cost": "medium",
+          "categories": ["culture", "museum", "art"]
+        },
+        {
+          "id": "broadway_show",
+          "name": "Broadway Show",
+          "description": "World-class theatrical performances.",
+          "duration": "half-day",
+          "cost": "high",
+          "categories": ["entertainment", "theater", "performance"]
+        },
+        {
+          "id": "times_square",
+          "name": "Times Square",
+          "description": "Iconic intersection known for its billboards and theaters.",
+          "duration": "short",
+          "cost": "free",
+          "categories": ["entertainment", "landmark", "shopping"]
+        },
+        {
+          "id": "empire_state",
+          "name": "Empire State Building",
+          "description": "Iconic skyscraper with observation decks.",
+          "duration": "half-day",
+          "cost": "medium",
+          "categories": ["entertainment", "landmark", "viewpoint"]
+        }
+      ]
+    },
+    "london": {
+      "name": "London",
+      "activities": [
+        {
+          "id": "hyde_park",
+          "name": "Hyde Park",
+          "description": "Large park in central London with Serpentine Lake.",
+          "duration": "half-day",
+          "cost": "free",
+          "categories": ["nature", "outdoor", "park"]
+        },
+        {
+          "id": "british_museum",
+          "name": "British Museum",
+          "description": "World-class museum with artifacts from around the globe.",
+          "duration": "full-day",
+          "cost": "free",
+          "categories": ["culture", "museum", "history"]
+        },
+        {
+          "id": "london_eye",
+          "name": "London Eye",
+          "description": "Giant observation wheel offering panoramic views.",
+          "duration": "short",
+          "cost": "medium",
+          "categories": ["entertainment", "landmark", "viewpoint"]
+        }
+      ]
+    }
+  }
+}

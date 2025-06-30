@@ -1,0 +1,205 @@
+{
+  "cities": {
+    "san_francisco": {
+      "name": "San Francisco",
+      "restaurants": [
+        {
+          "name": "Tartine Bakery",
+          "cuisine": "Bakery/Cafe",
+          "price_range": "$$",
+          "neighborhood": "Mission District",
+          "specialty": "Morning buns and country bread",
+          "meal_times": ["breakfast", "lunch"]
+        },
+        {
+          "name": "Liholiho Yacht Club",
+          "cuisine": "Hawaiian Fusion",
+          "price_range": "$$$",
+          "neighborhood": "Tenderloin",
+          "specialty": "Tuna poke and beef tongue buns",
+          "meal_times": ["dinner"]
+        },
+        {
+          "name": "La Taqueria",
+          "cuisine": "Mexican",
+          "price_range": "$",
+          "neighborhood": "Mission District",
+          "specialty": "Mission-style burritos",
+          "meal_times": ["lunch", "dinner"]
+        },
+        {
+          "name": "Zuni Cafe",
+          "cuisine": "California",
+          "price_range": "$$$",
+          "neighborhood": "Hayes Valley",
+          "specialty": "Roast chicken for two",
+          "meal_times": ["lunch", "dinner"]
+        },
+        {
+          "name": "Delfina",
+          "cuisine": "Italian",
+          "price_range": "$$$",
+          "neighborhood": "Mission District",
+          "specialty": "Spaghetti with plum tomatoes",
+          "meal_times": ["dinner"]
+        }
+      ],
+      "local_cuisine": {
+        "specialties": [
+          "Sourdough bread",
+          "Cioppino (seafood stew)",
+          "Mission-style burritos",
+          "Dungeness crab",
+          "Ghirardelli chocolate"
+        ],
+        "description": "San Francisco cuisine is known for its sourdough bread, seafood, and fusion of international influences. The city's food scene is driven by access to fresh local ingredients from Northern California."
+      },
+      "food_markets": [
+        {
+          "name": "Ferry Building Marketplace",
+          "description": "Iconic food hall with local vendors and farmers market",
+          "notable_vendors": ["Cowgirl Creamery", "Acme Bread", "Hog Island Oyster Co."]
+        },
+        {
+          "name": "Alemany Farmers' Market",
+          "description": "San Francisco's oldest farmers market with diverse produce",
+          "notable_vendors": ["Tomatero Farm", "Yerena Farms", "Massa Organics"]
+        }
+      ]
+    },
+    "new_york": {
+      "name": "New York",
+      "restaurants": [
+        {
+          "name": "Katz's Delicatessen",
+          "cuisine": "Deli",
+          "price_range": "$$",
+          "neighborhood": "Lower East Side",
+          "specialty": "Pastrami sandwich",
+          "meal_times": ["lunch", "dinner"]
+        },
+        {
+          "name": "Levain Bakery",
+          "cuisine": "Bakery",
+          "price_range": "$$",
+          "neighborhood": "Upper West Side",
+          "specialty": "Chocolate chip cookies",
+          "meal_times": ["breakfast", "lunch"]
+        },
+        {
+          "name": "Peter Luger Steak House",
+          "cuisine": "Steakhouse",
+          "price_range": "$$$",
+          "neighborhood": "Williamsburg",
+          "specialty": "Porterhouse steak",
+          "meal_times": ["lunch", "dinner"]
+        },
+        {
+          "name": "Russ & Daughters",
+          "cuisine": "Jewish",
+          "price_range": "$$",
+          "neighborhood": "Lower East Side",
+          "specialty": "Bagels and lox",
+          "meal_times": ["breakfast", "lunch"]
+        },
+        {
+          "name": "Di Fara Pizza",
+          "cuisine": "Pizza",
+          "price_range": "$$",
+          "neighborhood": "Midwood, Brooklyn",
+          "specialty": "Classic New York pizza",
+          "meal_times": ["lunch", "dinner"]
+        }
+      ],
+      "local_cuisine": {
+        "specialties": [
+          "New York-style pizza",
+          "Bagels with lox",
+          "Pastrami sandwiches",
+          "Cheesecake",
+          "Black and white cookies"
+        ],
+        "description": "New York cuisine reflects the city's diverse cultural influences, with iconic foods like thin-crust pizza, Jewish deli fare, and street food. The city is known for its bagels, which are boiled before baking to create their distinctive chewy texture."
+      },
+      "food_markets": [
+        {
+          "name": "Chelsea Market",
+          "description": "Food hall in a historic factory building with diverse vendors",
+          "notable_vendors": ["Los Tacos No. 1", "Lobster Place", "Sarabeth's"]
+        },
+        {
+          "name": "Smorgasburg",
+          "description": "Outdoor food market with innovative vendors",
+          "notable_vendors": ["Ramen Burger", "Dough Doughnuts", "Mighty Quinn's BBQ"]
+        }
+      ]
+    },
+    "london": {
+      "name": "London",
+      "restaurants": [
+        {
+          "name": "Dishoom",
+          "cuisine": "Indian",
+          "price_range": "$$",
+          "neighborhood": "Covent Garden",
+          "specialty": "Bombay-style food",
+          "meal_times": ["breakfast", "lunch", "dinner"]
+        },
+        {
+          "name": "The Ledbury",
+          "cuisine": "Modern European",
+          "price_range": "$$$",
+          "neighborhood": "Notting Hill",
+          "specialty": "Tasting menu",
+          "meal_times": ["dinner"]
+        },
+        {
+          "name": "Padella",
+          "cuisine": "Italian",
+          "price_range": "$$",
+          "neighborhood": "Borough Market",
+          "specialty": "Handmade pasta",
+          "meal_times": ["lunch", "dinner"]
+        },
+        {
+          "name": "Hawksmoor",
+          "cuisine": "Steakhouse",
+          "price_range": "$$$",
+          "neighborhood": "Seven Dials",
+          "specialty": "Dry-aged steaks",
+          "meal_times": ["lunch", "dinner"]
+        },
+        {
+          "name": "Regency Cafe",
+          "cuisine": "British",
+          "price_range": "$",
+          "neighborhood": "Westminster",
+          "specialty": "Full English breakfast",
+          "meal_times": ["breakfast", "lunch"]
+        }
+      ],
+      "local_cuisine": {
+        "specialties": [
+          "Full English breakfast",
+          "Fish and chips",
+          "Sunday roast",
+          "Afternoon tea",
+          "Sticky toffee pudding"
+        ],
+        "description": "Traditional British cuisine in London features hearty dishes like Sunday roasts and fish and chips, alongside refined traditions like afternoon tea. The city's diverse population has also made it a hub for international cuisines, particularly Indian food."
+      },
+      "food_markets": [
+        {
+          "name": "Borough Market",
+          "description": "Historic food market with artisanal producers and street food",
+          "notable_vendors": ["Bread Ahead", "Kappacasein", "Brindisa"]
+        },
+        {
+          "name": "Maltby Street Market",
+          "description": "Weekend market under railway arches with food vendors",
+          "notable_vendors": ["The Cheese Truck", "Little Bird Gin", "Waffle On"]
+        }
+      ]
+    }
+  }
+}
