@@ -27,8 +27,8 @@ agent:
     port: 9000
     ingress:
       enabled: false
-  rest:
-    port: 3000
+  fastapi:
+    port: 3001
     ingress:
       enabled: false
 
@@ -108,11 +108,11 @@ resources: {}
 livenessProbe:
   httpGet:
     path: /health
-    port: 3000
+    port: 3001
 readinessProbe:
   httpGet:
     path: /health
-    port: 3000
+    port: 3001
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:

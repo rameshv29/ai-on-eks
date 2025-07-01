@@ -1,8 +1,8 @@
-{{- if .Values.agent.rest.ingress.enabled -}}
+{{- if .Values.agent.fastapi.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "agent.fullname" . }}-rest
+  name: {{ include "agent.fullname" . }}-fastapi
   labels:
     {{- include "agent.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -37,7 +37,7 @@ spec:
               service:
                 name: {{ include "agent.fullname" $ }}
                 port:
-                  name: rest
+                  name: fastapi
           {{- end }}
     {{- end }}
 {{- end }}

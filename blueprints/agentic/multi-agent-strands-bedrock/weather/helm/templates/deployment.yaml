@@ -45,8 +45,8 @@ spec:
               value: "{{ .Values.agent.mcp.port }}"
             - name: A2A_PORT
               value: "{{ .Values.agent.a2a.port }}"
-            - name: REST_API_PORT
-              value: "{{ .Values.agent.rest.port }}"
+            - name: FASTAPI_PORT
+              value: "{{ .Values.agent.fastapi.port }}"
             {{- if .Values.agent.env }}
             {{- range .Values.agent.env }}
             - name: {{ .name }}
@@ -60,8 +60,8 @@ spec:
             - name: a2a
               containerPort: {{ .Values.agent.a2a.port }}
               protocol: TCP
-            - name: rest
-              containerPort: {{ .Values.agent.rest.port }}
+            - name: fastapi
+              containerPort: {{ .Values.agent.fastapi.port }}
               protocol: TCP
           {{- with .Values.livenessProbe }}
           livenessProbe:

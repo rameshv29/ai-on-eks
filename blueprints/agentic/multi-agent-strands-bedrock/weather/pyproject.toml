@@ -13,14 +13,19 @@ dependencies = [
     "markdown",
     "rich",
     "uv==0.7.11",
-    "flask>=3.0.0",
-    "requests>=2.31.0"
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "aiohttp>=3.8.0",
+    "requests>=2.31.0",
+    "pyjwt==2.10.1",
+    "cryptography==45.0.4",
+    "dotenv==0.9.9"
 ]
 
 [project.scripts]
 "mcp-server"  = "main:main_mcp_server"
 "a2a-server"  = "main:main_a2a_server"
-"rest-api"    = "main:main_rest_api"
+"fastapi"     = "main:main_fastapi"
 "interactive" = "main:main_interactive"
 "agent" = "main:servers"
 

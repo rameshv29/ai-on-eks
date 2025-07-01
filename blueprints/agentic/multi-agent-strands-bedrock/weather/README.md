@@ -1,6 +1,6 @@
 # AI Agents on EKS
 
-A generic AI agent framework built with Strands Agents, MCP (Model Context Protocol), A2A (Agent to Agent), and REST API. Configurable for any domain including weather forecasts, financial analysis, customer service, and more.
+A generic AI agent framework built with Strands Agents, MCP (Model Context Protocol), A2A (Agent to Agent), and FastAPI. Configurable for any domain including weather forecasts, financial analysis, customer service, and more.
 
 
 ## Deploy your first AI Agent on EKS
@@ -106,12 +106,12 @@ graph TB
 
 **Key Components:**
 
-- **Triple Protocol Support**: Single pod serves MCP (port 8080), A2A (port 9000), and REST API (port 3000) protocols
+- **Triple Protocol Support**: Single pod serves MCP (port 8080), A2A (port 9000), and FastAPI (port 3001) protocols
 - **EKS Auto Mode**: Automatic node provisioning and management
 - **Pod Identity**: Secure access to Amazon Bedrock without storing credentials
 - **MCP Protocol**: Standardized interface for AI model communication via HTTP
 - **A2A Protocol**: Agent-to-Agent communication for multi-agent workflows
-- **REST API**: Traditional HTTP REST endpoints for weather queries
+- **FastAPI**: Modern Python web framework with automatic API documentation
 - **Container Registry**: Stores the weather agent container image
 
 ---
@@ -443,10 +443,10 @@ You should see:
 INFO - Starting Weather Agent Triple Server...
 INFO - MCP Server will run on port 8080 with streamable-http
 INFO - A2A Server will run on port 9000
-INFO - REST API Server will run on port 3000
+INFO - FastAPI Server will run on port 3001
 INFO - Starting MCP Server
 INFO - Starting A2A Server
-INFO - Starting REST API Server
+INFO - Starting FastAPI Server
 INFO - All three servers started successfully!
 ```
 
@@ -470,13 +470,13 @@ The weather agent supports three protocols simultaneously. You can access it thr
 ```bash
 # Port forward all three services
 kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
-  port-forward service/${KUBERNETES_APP_WEATHER_AGENT_NAME} 8080:mcp 9000:a2a 3000:rest
+  port-forward service/${KUBERNETES_APP_WEATHER_AGENT_NAME} 8080:mcp 9000:a2a 3001:fastapi
 ```
 
 #### Test the Agent with curl:
 ```bash
 # Chat with weather agent
-./test_e2e_rest_api_curl.sh
+./test_e2e_fastapi_curl.sh
 ```
 The expected output:
 ```
@@ -489,12 +489,12 @@ The expected output:
 📊 Test Results:
    • Health Check: Passed ✅
    • Weather Forecasts: 5 queries tested 🌤️
-   • API Endpoints: REST API (port 3000) 🔗
+   • API Endpoints: FastAPI (port 3001) 🔗
 
 🔧 Additional Testing Options:
    • MCP Protocol: Use test_e2e_mcp.py (port 8080)
    • A2A Protocol: Use test_e2e_a2a.py (port 9000)
-   • REST API:     Use test_e2e_rest_api.py   (port 3000)
+   • FastAPI:      Use test_e2e_fastapi.py or test_e2e_fastapi_curl.sh (port 3001)
 
 ✨ Workshop participants can now interact with the Weather Agent! ✨
 ...
@@ -508,7 +508,8 @@ The expected output:
 # In separate terminals, run each test client:
 uv run test_e2e_mcp.py        # Tests MCP Protocol (6 tests)
 uv run test_e2e_a2a.py        # Tests A2A Protocol (6 tests)
-uv run test_e2e_rest_api.py   # Tests REST API (9 tests)
+uv run test_e2e_fastapi.py    # Tests FastAPI (6 tests)
+./test_e2e_fastapi_curl.sh    # Tests FastAPI (6 tests, colorized)
 ```
 
 #### Test Client Features
@@ -535,14 +536,13 @@ Each test client provides:
 - Weather forecast and alert queries
 - Response validation and formatting
 
-**REST API (9 tests):**
+**FastAPI (6 tests each):**
+- **Python Client** (`test_e2e_fastapi.py`): Async HTTP testing with aiohttp
+- **Curl Client** (`test_e2e_fastapi_curl.sh`): Workshop-friendly colorized output
 - Health check endpoint validation
-- Chat endpoint functionality with session management
-- Session continuity and context awareness
-- Conversation history management
-- Session information retrieval
-- History clearing functionality
-- Error handling (404, 400 responses)
+- FastAPI endpoint functionality with weather queries
+- Response validation and formatting
+- Error handling (empty text, 404 responses)
 
 ---
 
@@ -627,14 +627,14 @@ uv run a2a-server
 uv run test_e2e_a2a.py
 ```
 
-#### Run as REST API server
+#### Run as FastAPI server
 ```bash
-uv run rest-api
+uv run fastapi
 ```
 
-#### Run the REST API client
+#### Run the FastAPI client
 ```bash
-uv run test_e2e_rest_api.py
+./test_e2e_fastapi_curl.sh
 ```
 
 #### Running in a Container
@@ -661,7 +661,7 @@ agent interactive
 Type a question, to exit use `/quit`
 
 
-Run the agent as multi-server mcp, a2a, and REST API
+Run the agent as multi-server mcp, a2a, and FastAPI
 ```bash
 docker run \
 -v $HOME/.aws:/app/.aws \
@@ -680,7 +680,7 @@ Use test clients to verify all three protocols:
 ```bash
 uv run test_e2e_mcp.py        # Tests MCP Protocol
 uv run test_e2e_a2a.py        # Tests A2A Protocol
-uv run test_e2e_rest_api.py   # Tests REST API
+uv run test_e2e_fastapi_curl.sh  # Tests FastAPI
 ```
 
 Now you can connect with the MCP client to `http://localhost:8080/mcp`.

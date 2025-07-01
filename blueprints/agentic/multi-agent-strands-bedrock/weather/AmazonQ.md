@@ -6,12 +6,12 @@
 ## 🎯 Project State Summary
 
 **Current Status**: Production-ready triple-protocol AI agent with EKS deployment capability
-**Key Achievement**: Single container serving MCP (port 8080), A2A (port 9000), and REST API (port 3000) protocols concurrently
+**Key Achievement**: Single container serving MCP (port 8080), A2A (port 9000), and FastAPI (port 3001) protocols concurrently
 
 ## 🏗️ Technical Architecture
 
 ### Core Implementation
-- **Triple Server**: ThreadPoolExecutor-based concurrent MCP/A2A/REST API servers in `main.py`
+- **Triple Server**: ThreadPoolExecutor-based concurrent MCP/A2A/FastAPI servers in `main.py`
 - **Default Transport**: streamable-http (changed from stdio for container compatibility)
 - **Multi-Architecture**: AMD64/ARM64 support via docker buildx
 - **Security**: EKS Pod Identity for Bedrock access (no credential storage)
@@ -24,12 +24,12 @@ weather/
 ├── cloudbot.md              # Fallback agent configuration (CloudBot)
 ├── agent_mcp_server.py      # MCP server (port 8080)
 ├── agent_a2a_server.py      # A2A server (port 9000)
-├── agent_rest_api.py        # REST API server (port 3000)
+├── agent_fastapi.py         # FastAPI server (port 3001)
 ├── main.py                  # Entry points + triple server orchestrator
 ├── test_e2e_mcp.py          # MCP protocol test client
 ├── test_e2e_a2a.py          # A2A protocol test client
-├── test_e2e_rest_api.py     # REST API test client
-├── test_e2e_rest_api_curl.sh # Workshop-friendly curl test script
+├── test_e2e_fastapi.py      # FastAPI Python test client
+├── test_e2e_fastapi_curl.sh # Workshop-friendly curl test script
 ├── Dockerfile               # Multi-arch container (agent)
 ├── helm/                    # Kubernetes deployment charts
 ├── mcp-servers/             # MCP tool definitions
@@ -58,10 +58,10 @@ weather/
 - **Impact**: Eliminates need for CLI args in container deployment
 - **Compatibility**: Maintains stdio support via `--transport stdio`
 
-### 4. REST API Integration
-- **Implementation**: Flask-based REST API in `agent_rest_api.py`
+### 4. FastAPI Integration
+- **Implementation**: FastAPI-based API in `agent_fastapi.py`
 - **Integration**: Uses existing `weather_assistant()` function from `agent.py`
-- **Endpoints**: `/health`, `/chat`
+- **Endpoints**: `/health`, `/prompt`
 
 ### 5. Multi-Architecture Build Strategy
 - **Issue Resolved**: `exec format error` on mixed EKS node types
@@ -74,7 +74,7 @@ weather/
 # pyproject.toml [project.scripts]
 "mcp-server"  = "main:main_mcp_server"    # MCP only
 "a2a-server"  = "main:main_a2a_server"    # A2A only
-"rest-api"    = "main:main_rest_api"      # REST API only
+"fastapi"     = "main:main_fastapi"       # FastAPI only
 "interactive" = "main:main_interactive"    # CLI mode
 "agent" = "main:servers"    # All three servers (DEFAULT)
 ```
@@ -90,7 +90,7 @@ CMD ["agent"]
 ```bash
 MCP_PORT=8080                                                    # MCP server port
 A2A_PORT=9000                                                    # A2A server port
-REST_API_PORT=3000                                               # REST API server port
+FASTAPI_PORT=3001                                                # FastAPI server port
 BEDROCK_MODEL_ID=us.anthropic.claude-3-7-sonnet-20250219-v1:0  # Bedrock model
 AWS_REGION=us-west-2                                            # AWS region
 ```
@@ -102,7 +102,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t ${ECR_REPO_URI}:latest
 
 # Local testing
 docker build -t weather-agent .
-docker run -p 8080:8080 -p 9000:9000 -p 3000:3000 -e AWS_REGION=us-west-2 weather-agent
+docker run -p 8080:8080 -p 9000:9000 -p 3001:3001 -e AWS_REGION=us-west-2 weather-agent
 ```
 
 ## 🔍 AI Agent Troubleshooting Database
@@ -116,7 +116,7 @@ docker run -p 8080:8080 -p 9000:9000 -p 3000:3000 -e AWS_REGION=us-west-2 weathe
 ### Issue: Health Check Failures
 - **Symptom**: Pod CrashLoopBackOff, health check timeouts
 - **Root Cause**: Wrong transport or port configuration
-- **Fix**: Ensure streamable-http transport and correct ports (8080/9000)
+- **Fix**: Ensure streamable-http transport and correct ports (8080/9000/3001)
 - **Debug**: Check `kubectl logs deployment/weather-agent`
 
 ### Issue: Single Protocol Access
@@ -125,11 +125,11 @@ docker run -p 8080:8080 -p 9000:9000 -p 3000:3000 -e AWS_REGION=us-west-2 weathe
 - **Fix**: Ensure `CMD ["agent"]`
 - **Verification**: Test both `curl localhost:8080` and `curl localhost:9000`
 
-### Issue: REST API Not Responding
-- **Symptom**: REST API endpoints return 404 or connection refused
-- **Root Cause**: Flask dependency missing or wrong port configuration
-- **Fix**: Ensure Flask is installed and REST_API_PORT=3000
-- **Verification**: Test `curl localhost:3000/health`
+### Issue: FastAPI Not Responding
+- **Symptom**: FastAPI endpoints return 404 or connection refused
+- **Root Cause**: FastAPI dependency missing or wrong port configuration
+- **Fix**: Ensure FastAPI is installed and FASTAPI_PORT=3001
+- **Verification**: Test `curl localhost:3001/health`
 
 ### Issue: Mermaid Diagram Rendering
 - **Symptom**: "Unsupported markdown: list" in GitHub
@@ -174,11 +174,17 @@ def main():
 - **Key Features**: Agent card discovery, client initialization, message sending
 - **Connection**: `A2ACardResolver` and `A2AClient`
 
-### REST API Test Client (`test_e2e_rest_api.py`)
-- **Protocol**: HTTP REST
-- **Tests**: 4 tests (1-4)
-- **Key Features**: Health checks, chat endpoints, error handling
-- **Connection**: Standard `requests` library
+### FastAPI Test Client (`test_e2e_fastapi.py`)
+- **Protocol**: HTTP with FastAPI
+- **Tests**: 6 tests (1-6)
+- **Key Features**: Async HTTP testing, health checks, weather endpoints, error handling
+- **Connection**: aiohttp with async/await
+
+### FastAPI Test Client (`test_e2e_fastapi_curl.sh`)
+- **Protocol**: HTTP with FastAPI
+- **Tests**: 6 tests (1-6)
+- **Key Features**: Health checks, weather endpoints, error handling
+- **Connection**: Standard `curl` with JSON requests
 
 ### Test Output Consistency
 ```
@@ -231,27 +237,28 @@ uv run test_e2e_a2a.py
 - Invalid message format handling
 - Full response display with markdown rendering
 
-### REST API Test Client (`test_e2e_rest_api.py`)
+### FastAPI Test Client (`test_e2e_fastapi.py`)
 ```bash
-# Tests: 4 comprehensive REST API tests (1-4)
-uv run test_e2e_rest_api.py
+# Tests: 6 comprehensive FastAPI tests (1-6)
+uv run test_e2e_fastapi.py
 ```
 **Test Coverage:**
 - Health check endpoint validation
-- Chat endpoint with weather queries
-- 404 error handling for invalid endpoints
-- 400 error handling for malformed requests
+- Root endpoint functionality
+- Weather forecast queries with async HTTP
+- Alert queries with response validation
+- Error handling (empty text, 404 responses)
+- Async/await pattern with aiohttp
 
-### Workshop Curl Test Script (`test_e2e_rest_api_curl.sh`)
+### FastAPI Test Client (`test_e2e_fastapi_curl.sh`)
 ```bash
-# Workshop-friendly curl test with colorized output
-./test_e2e_rest_api_curl.sh
+# Tests: 6 comprehensive FastAPI tests (1-6)
+./test_e2e_fastapi_curl.sh
 ```
 **Test Coverage:**
-- Health check with service status
-- 5 weather queries with formatted responses
-- Workshop-friendly colorized output
-- Perfect for participant demonstrations
+- Health check endpoint validation
+- FastAPI endpoint functionality with weather queries
+- Response validation and formatting
 
 ### Test Suite Execution
 ```bash
@@ -261,10 +268,8 @@ uv run agent
 # Run all tests (in separate terminals)
 uv run test_e2e_mcp.py        # Port 8080
 uv run test_e2e_a2a.py        # Port 9000
-uv run test_e2e_rest_api.py   # Port 3000
-
-# Workshop-friendly curl test
-./test_e2e_rest_api_curl.sh   # Port 3000 (colorized output)
+uv run test_e2e_fastapi.py    # Port 3001
+./test_e2e_fastapi_curl.sh    # Port 3001
 ```
 
 ### Development Testing
@@ -280,13 +285,8 @@ uv run rest-api
 # Protocol verification
 uv run test_e2e_mcp.py               # MCP: http://localhost:8080/mcp
 uv run test_e2e_a2a.py               # A2A: http://localhost:9000
-uv run test_e2e_rest_api.py          # REST API: http://localhost:3000
-
-# Alternative MCP Inspector
-npx @modelcontextprotocol/inspector  # MCP: http://localhost:8080/mcp
-
-# Workshop-friendly curl test
-./test_e2e_rest_api_curl.sh          # REST API: http://localhost:3000 (colorized)
+uv run test_e2e_fastapi.py           # FastAPI: http://localhost:3001
+./test_e2e_fastapi_curl.sh           # FastAPI: http://localhost:3001
 
 ```
 
@@ -306,8 +306,8 @@ kubectl port-forward service/weather-agent 8080:8080 9000:9000 3000:3000
 # Test all protocols
 uv run test_e2e_mcp.py        # MCP Protocol validation
 uv run test_e2e_a2a.py        # A2A Protocol validation
-uv run test_e2e_rest_api.py   # REST API validation
-./test_e2e_rest_api_curl.sh   # Workshop-friendly curl test
+uv run test_e2e_fastapi.py    # FastAPI validation
+./test_e2e_fastapi_curl.sh    # FastAPI validation
 ```
 
 ## 🎯 AI Agent Workflow Guidelines
@@ -336,7 +336,7 @@ uv run test_e2e_rest_api.py   # REST API validation
 - **Bedrock Model**: `us.anthropic.claude-3-7-sonnet-20250219-v1:0`
 - **MCP Inspector**: `npx @modelcontextprotocol/inspector`
 - **A2A Test Client**: `uv run test_e2e_a2a.py`
-- **REST API Test Client**: `uv run test_e2e_rest_api.py`
+- **FastAPI Test Client**: `./test_e2e_fastapi_curl.sh`
 
 ---
 

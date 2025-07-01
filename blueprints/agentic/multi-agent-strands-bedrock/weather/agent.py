@@ -10,6 +10,10 @@ from mcp.client.streamable_http import streamablehttp_client
 from strands import Agent, tool
 from strands.models import BedrockModel
 from strands.tools.mcp import MCPClient
+from strands.types.content import Messages
+
+# Cache for MCP tools to avoid reloading on every get_agent() call
+_mcp_tools_cache = None
 
 
 @tool
@@ -94,7 +98,7 @@ def _extract_section(content: str, section_name: str) -> Optional[str]:
 
     return None
 
-def get_agent() -> Agent:
+def get_agent(messages: Optional[Messages]=None) -> Agent:
     """
     Create and return an Agent instance with dynamically loaded MCP tools.
 
@@ -108,8 +112,8 @@ def get_agent() -> Agent:
     agent_name, agent_description, system_prompt = _load_agent_config()
 
     try:
-        # Load and combine tools from all enabled MCP servers
-        all_tools = _load_mcp_tools_from_config()
+        # Load and combine tools from all enabled MCP servers (cached)
+        all_tools = _get_cached_mcp_tools()
 
         # Create the agent with configuration from agent.md
         agent = Agent(
@@ -118,6 +122,7 @@ def get_agent() -> Agent:
             model=bedrock_model,
             system_prompt=system_prompt,
             tools=all_tools,
+            messages=messages
         )
 
         return agent
@@ -132,6 +137,14 @@ I apologize for the inconvenience. Please try again later or contact support if 
             tools=[],
         )
         return fallback_agent
+
+
+def _get_cached_mcp_tools() -> List[Any]:
+    """Get MCP tools from cache or load them if not cached."""
+    global _mcp_tools_cache
+    if _mcp_tools_cache is None:
+        _mcp_tools_cache = _load_mcp_tools_from_config()
+    return _mcp_tools_cache
 
 
 def _load_mcp_tools_from_config() -> List[Any]:
@@ -223,31 +236,6 @@ def _create_mcp_client_from_config(server_name: str, server_config: Dict[str, An
     else:
         raise ValueError(f"Invalid MCP server configuration for {server_name}: must have either 'url' or both 'command' and 'args'")
 
-
-def _create_mcp_client() -> MCPClient:
-    """
-    Create an MCP client based on environment configuration (legacy fallback).
-
-    Returns:
-        MCPClient: Configured MCP client
-    """
-    mcp_server_url = os.getenv("MCP_SERVER_URL")
-    if mcp_server_url:
-        print(f"Using MCP server streamable http URL: {mcp_server_url}")
-        return MCPClient(
-            lambda: streamablehttp_client(mcp_server_url)
-        )
-
-    mcp_server_location = os.getenv("MCP_SERVER_LOCATION","mcp-servers/weather-mcp-server")
-    print(f"Using MCP server stdio from location: {mcp_server_location}")
-    return MCPClient(
-        lambda: stdio_client(
-            StdioServerParameters(
-                command="uvx",
-                args=["--from", ".", "--directory", mcp_server_location, "mcp-server", "--transport","stdio"]
-            )
-        )
-    )
 
 
 if __name__ == "__main__":

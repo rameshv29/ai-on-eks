@@ -78,6 +78,9 @@ WORKDIR /app
 # Run as non-root
 USER app
 
+# Expose ports for MCP (8080)
+EXPOSE 8080
+
 # When running the container, add --db-path and a bind mount to the host's db file
 #HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "docker-healthcheck.sh" ]
 CMD ["mcp-server"]
