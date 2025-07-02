@@ -13,6 +13,14 @@ module "weather_agent_pod_identity" {
         "bedrock:InvokeModelWithResponseStream"
       ]
       resources = ["*"]
+    },
+    {
+      sid = "DynamoDBAccess"
+      actions = [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem"
+      ]
+      resources = ["arn:aws:dynamodb:*:*:table/*weather*"]
     }
   ]
 
@@ -22,11 +30,6 @@ module "weather_agent_pod_identity" {
       cluster_name    = module.eks.cluster_name
       namespace       = "weather-agent"
       service_account = "weather-agent"
-    },
-    weather-mcp-server = {
-      cluster_name    = module.eks.cluster_name
-      namespace       = "weather-mcp-server"
-      service_account = "weather-mcp-server"
     }
   }
 

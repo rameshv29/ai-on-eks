@@ -12,4 +12,6 @@ resource "aws_dynamodb_table" "weather_agent_state_table" {
     name = "user_id"
     type = "S"
   }
+
+  tags = var.tags
 }
