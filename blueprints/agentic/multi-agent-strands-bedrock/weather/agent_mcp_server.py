@@ -6,20 +6,15 @@ import os
 from mcp.server.fastmcp import FastMCP
 from agent import get_agent
 
-# Initialize FastMCP server
-mcp = FastMCP("ai-agent")
+from agent_config import load_agent_config
+# Load agent configuration
+agent_name, agent_description, system_prompt = load_agent_config()
 
-@mcp.tool()
+# Initialize FastMCP server with dynamic name
+mcp = FastMCP(agent_name)
+
+@mcp.tool(name=agent_name, description=agent_description)
 async def query_agent(query: str) -> str:
-    """
-    Process and respond to weather forecast or alert queries.
-
-    Args:
-        query: The user's input
-
-    Returns:
-        A response to the user's query
-    """
     # Get agent configuration for server naming
     agent_instance = get_agent()
     return str(agent_instance(query))

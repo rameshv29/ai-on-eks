@@ -1,4 +1,4 @@
-"""Main entry point for the Weather Agent application."""
+"""Main entry point for the Agent application."""
 
 import logging
 import os
@@ -52,10 +52,10 @@ def main_interactive():
 
 def servers():
     """Start MCP, A2A, and FastAPI servers concurrently."""
-    logger.info("Starting Weather Agent Triple Server...")
+    logger.info("Starting Agent Triple Server...")
     logger.info(f"MCP Server will run on port {os.getenv('MCP_PORT', '8080')} with streamable-http transport")
     logger.info(f"A2A Server will run on port {os.getenv('A2A_PORT', '9000')}")
-    logger.info(f"FastAPI Server will run on port {os.getenv('FASTAPI_PORT', '3001')}")
+    logger.info(f"FastAPI Server will run on port {os.getenv('FASTAPI_PORT', '3000')}")
 
     # Event to coordinate shutdown
     shutdown_event = threading.Event()

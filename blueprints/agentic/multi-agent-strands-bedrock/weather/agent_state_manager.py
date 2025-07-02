@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 ddb = boto3.resource('dynamodb')
-agent_state_table = ddb.Table(os.environ['DYNAMODB_WEATHER_AGENT_STATE_TABLE_NAME'])
+agent_state_table = ddb.Table(os.environ['DYNAMODB_AGENT_STATE_TABLE_NAME'])
 
 def save(user_id: str, agent: Agent):
     logger.info(f"saving agent state for user.id={user_id}")

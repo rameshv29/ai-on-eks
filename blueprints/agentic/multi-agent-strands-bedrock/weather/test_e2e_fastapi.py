@@ -31,7 +31,7 @@ async def wait_for_server(base_url: str, timeout: int = 30):
     print("uv run fastapi")
     return False
 
-async def test_fastapi_endpoints(base_url: str = "http://localhost:3001"):
+async def test_fastapi_endpoints(base_url: str = "http://localhost:3000"):
     """Test the AI Agent FastAPI endpoints"""
 
     if not await wait_for_server(base_url):

@@ -68,72 +68,86 @@ async def test_mcp_protocol(base_url: str = "http://localhost:8080"):
 
                 print()
 
-                # Test 3: Agent Query Tool Call
-                print("3. Testing agent query tool...")
+                # Test 3: Weather Forecast Query
+                print("3. Testing weather forecast query...")
                 try:
-                    forecast_query = "What's the weather forecast for Seattle this weekend?"
+                    forecast_query = "What's the weather forecast for Seattle, WA this weekend?"
                     print(f"   Query: {forecast_query}")
 
                     forecast_result = await session.call_tool(
-                        name="query_agent",
+                        name="Weather Assistant",
                         arguments={"query": forecast_query}
                     )
 
-                    print("✅ Agent query tool successful")
+                    print("✅ Weather forecast query successful")
                     if forecast_result.content:
                         content = forecast_result.content[0]
                         if hasattr(content, 'text'):
                             response_text = content.text
-                            print(f"   Response: {response_text[:100]}...")
+                            print(f"   Response: {response_text[:200]}...")
                         else:
-                            print(f"   Response: {str(content)[:100]}...")
+                            print(f"   Response: {str(content)[:200]}...")
 
                 except Exception as e:
-                    print(f"❌ Agent query tool failed: {str(e)}")
+                    print(f"❌ Weather forecast query failed: {str(e)}")
 
                 print()
 
-                # Test 4: Agent Alert Query Tool Call
-                print("4. Testing agent alert query tool...")
+                # Test 4: Weather Alerts Query
+                print("4. Testing weather alerts query...")
                 try:
-                    alert_query = "Are there any weather alerts for Miami, Florida?"
+                    alert_query = "Are there any weather alerts for Florida?"
                     print(f"   Query: {alert_query}")
 
                     alert_result = await session.call_tool(
-                        name="query_agent",
+                        name="Weather Assistant",
                         arguments={"query": alert_query}
                     )
 
-                    print("✅ Agent alert query tool successful")
+                    print("✅ Weather alerts query successful")
                     if alert_result.content:
                         content = alert_result.content[0]
                         if hasattr(content, 'text'):
                             response_text = content.text
-                            print(f"   Response: {response_text[:100]}...")
+                            print(f"   Response: {response_text[:200]}...")
                         else:
-                            print(f"   Response: {str(content)[:100]}...")
+                            print(f"   Response: {str(content)[:200]}...")
 
                 except Exception as e:
-                        print(f"❌ Agent alert query tool failed: {str(e)}")
+                        print(f"❌ Weather alerts query failed: {str(e)}")
 
                 print()
 
-                # Test 5: Complex Agent Query
-                print("5. Testing complex agent query...")
+                # Test 5: Complex Weather Comparison Query
+                print("5. Testing complex weather comparison...")
                 try:
-                    complex_query = "Compare the weather between New York and Los Angeles for the next 3 days"
+                    complex_query = "Compare the weather between New York, NY and Los Angeles, CA for the next 3 days"
                     print(f"   Query: {complex_query}")
 
                     complex_result = await session.call_tool(
-                        name="query_agent",
+                        name="Weather Assistant",
                         arguments={"query": complex_query}
                     )
 
-                    print("✅ Complex agent query successful")
-                    display_formatted_response(complex_result)
+                    print("✅ Complex weather comparison successful")
+                    print("   Formatted Response:")
+                    print("   " + "-" * 40)
+                    if complex_result.content:
+                        content = complex_result.content[0]
+                        if hasattr(content, 'text'):
+                            response_text = content.text
+                            # Format the response nicely
+                            lines = response_text.split('\n')
+                            for line in lines[:10]:  # Show first 10 lines
+                                print(f"   {line}")
+                            if len(lines) > 10:
+                                print("   ...")
+                        else:
+                            print(f"   {str(content)}")
+                    print("   " + "-" * 40)
 
                 except Exception as e:
-                    print(f"❌ Complex agent query failed: {str(e)}")
+                    print(f"❌ Complex weather comparison failed: {str(e)}")
 
                 print()
                 print("=" * 50)

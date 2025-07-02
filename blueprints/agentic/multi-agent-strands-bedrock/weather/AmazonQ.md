@@ -6,7 +6,7 @@
 ## 🎯 Project State Summary
 
 **Current Status**: Production-ready triple-protocol AI agent with EKS deployment capability
-**Key Achievement**: Single container serving MCP (port 8080), A2A (port 9000), and FastAPI (port 3001) protocols concurrently
+**Key Achievement**: Single container serving MCP (port 8080), A2A (port 9000), and FastAPI (port 3000) protocols concurrently
 
 ## 🏗️ Technical Architecture
 
@@ -24,7 +24,7 @@ weather/
 ├── cloudbot.md              # Fallback agent configuration (CloudBot)
 ├── agent_mcp_server.py      # MCP server (port 8080)
 ├── agent_a2a_server.py      # A2A server (port 9000)
-├── agent_fastapi.py         # FastAPI server (port 3001)
+├── agent_fastapi.py         # FastAPI server (port 3000)
 ├── main.py                  # Entry points + triple server orchestrator
 ├── test_e2e_mcp.py          # MCP protocol test client
 ├── test_e2e_a2a.py          # A2A protocol test client
@@ -72,11 +72,11 @@ weather/
 
 ```python
 # pyproject.toml [project.scripts]
-"mcp-server"  = "main:main_mcp_server"    # MCP only
-"a2a-server"  = "main:main_a2a_server"    # A2A only
-"fastapi"     = "main:main_fastapi"       # FastAPI only
-"interactive" = "main:main_interactive"    # CLI mode
-"agent" = "main:servers"    # All three servers (DEFAULT)
+"mcp-server"     = "main:main_mcp_server"    # MCP only
+"a2a-server"     = "main:main_a2a_server"    # A2A only
+"fastapi-server" = "main:main_fastapi"       # FastAPI only
+"interactive"    = "main:main_interactive"    # CLI mode
+"agent"          = "main:servers"    # All three servers (DEFAULT)
 ```
 
 ```dockerfile
@@ -90,7 +90,7 @@ CMD ["agent"]
 ```bash
 MCP_PORT=8080                                                    # MCP server port
 A2A_PORT=9000                                                    # A2A server port
-FASTAPI_PORT=3001                                                # FastAPI server port
+FASTAPI_PORT=3000                                                # FastAPI server port
 BEDROCK_MODEL_ID=us.anthropic.claude-3-7-sonnet-20250219-v1:0  # Bedrock model
 AWS_REGION=us-west-2                                            # AWS region
 ```
@@ -102,7 +102,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t ${ECR_REPO_URI}:latest
 
 # Local testing
 docker build -t weather-agent .
-docker run -p 8080:8080 -p 9000:9000 -p 3001:3001 -e AWS_REGION=us-west-2 weather-agent
+docker run -p 8080:8080 -p 9000:9000 -p 3000:3000 -e AWS_REGION=us-west-2 weather-agent
 ```
 
 ## 🔍 AI Agent Troubleshooting Database
@@ -116,7 +116,7 @@ docker run -p 8080:8080 -p 9000:9000 -p 3001:3001 -e AWS_REGION=us-west-2 weathe
 ### Issue: Health Check Failures
 - **Symptom**: Pod CrashLoopBackOff, health check timeouts
 - **Root Cause**: Wrong transport or port configuration
-- **Fix**: Ensure streamable-http transport and correct ports (8080/9000/3001)
+- **Fix**: Ensure streamable-http transport and correct ports (8080/9000/3000)
 - **Debug**: Check `kubectl logs deployment/weather-agent`
 
 ### Issue: Single Protocol Access
@@ -128,8 +128,8 @@ docker run -p 8080:8080 -p 9000:9000 -p 3001:3001 -e AWS_REGION=us-west-2 weathe
 ### Issue: FastAPI Not Responding
 - **Symptom**: FastAPI endpoints return 404 or connection refused
 - **Root Cause**: FastAPI dependency missing or wrong port configuration
-- **Fix**: Ensure FastAPI is installed and FASTAPI_PORT=3001
-- **Verification**: Test `curl localhost:3001/health`
+- **Fix**: Ensure FastAPI is installed and FASTAPI_PORT=3000
+- **Verification**: Test `curl localhost:3000/health`
 
 ### Issue: Mermaid Diagram Rendering
 - **Symptom**: "Unsupported markdown: list" in GitHub
@@ -240,6 +240,7 @@ uv run test_e2e_a2a.py
 ### FastAPI Test Client (`test_e2e_fastapi.py`)
 ```bash
 # Tests: 6 comprehensive FastAPI tests (1-6)
+# Requires: DISABLE_AUTH=1 uv run fastapi-server
 uv run test_e2e_fastapi.py
 ```
 **Test Coverage:**
@@ -260,6 +261,11 @@ uv run test_e2e_fastapi.py
 - FastAPI endpoint functionality with weather queries
 - Response validation and formatting
 
+**Note:** FastAPI tests require authentication to be disabled. Run the server with:
+```bash
+DISABLE_AUTH=1 uv run fastapi-server
+```
+
 ### Test Suite Execution
 ```bash
 # Start triple server
@@ -268,8 +274,8 @@ uv run agent
 # Run all tests (in separate terminals)
 uv run test_e2e_mcp.py        # Port 8080
 uv run test_e2e_a2a.py        # Port 9000
-uv run test_e2e_fastapi.py    # Port 3001
-./test_e2e_fastapi_curl.sh    # Port 3001
+uv run test_e2e_fastapi.py    # Port 3000 (requires DISABLE_AUTH=1 server)
+./test_e2e_fastapi_curl.sh    # Port 3000 (requires DISABLE_AUTH=1 server)
 ```
 
 ### Development Testing
@@ -280,13 +286,14 @@ uv run agent
 # Test individual protocols
 uv run mcp-server --transport stdio
 uv run a2a-server
-uv run rest-api
+uv run fastapi-server                # For production (with auth)
+DISABLE_AUTH=1 uv run fastapi-server # For testing (without auth)
 
 # Protocol verification
 uv run test_e2e_mcp.py               # MCP: http://localhost:8080/mcp
 uv run test_e2e_a2a.py               # A2A: http://localhost:9000
-uv run test_e2e_fastapi.py           # FastAPI: http://localhost:3001
-./test_e2e_fastapi_curl.sh           # FastAPI: http://localhost:3001
+uv run test_e2e_fastapi.py           # FastAPI: http://localhost:3000 (requires DISABLE_AUTH=1)
+./test_e2e_fastapi_curl.sh           # FastAPI: http://localhost:3000 (requires DISABLE_AUTH=1)
 
 ```
 

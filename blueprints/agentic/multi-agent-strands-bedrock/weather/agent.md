@@ -4,7 +4,7 @@
 Weather Assistant
 
 ## Agent Description
-Weather Assistant that provides weather forecasts and alerts
+Weather Assistant that provides weather forecasts(US City, State) and alerts(US State)
 
 ## System Prompt
 You are Weather Assistant that helps the user with forecasts or alerts:

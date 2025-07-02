@@ -23,11 +23,11 @@ dependencies = [
 ]
 
 [project.scripts]
-"mcp-server"  = "main:main_mcp_server"
-"a2a-server"  = "main:main_a2a_server"
-"fastapi"     = "main:main_fastapi"
-"interactive" = "main:main_interactive"
-"agent" = "main:servers"
+"mcp-server"     = "main:main_mcp_server"
+"a2a-server"     = "main:main_a2a_server"
+"fastapi-server" = "main:main_fastapi"
+"interactive"    = "main:main_interactive"
+"agent"          = "main:servers"
 
 
 [build-system]

@@ -2,101 +2,28 @@
 
 import json
 import os
-import re
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 
 from mcp import StdioServerParameters, stdio_client
 from mcp.client.streamable_http import streamablehttp_client
-from strands import Agent, tool
+from strands import Agent
 from strands.models import BedrockModel
 from strands.tools.mcp import MCPClient
 from strands.types.content import Messages
+
+from agent_config import load_agent_config
+# Load agent configuration
+agent_name, agent_description, system_prompt = load_agent_config()
+
 
 # Cache for MCP tools to avoid reloading on every get_agent() call
 _mcp_tools_cache = None
 
 
-@tool
-def agent_tool(query: str) -> str:
-    """
-    Process and respond to weather forecast or alert queries.
-
-    Args:
-        query: The user's question or request
-
-    Returns:
-        A helpful response addressing the user's query
-    """
-    try:
-        agent = get_agent()
-        response = str(agent(query))
-        if response:
-            return response
-    except Exception as e:
-        print(f"Error processing query: {str(e)}")
-        return "I apologize, but I encountered an error while processing your request. Please try again later."
-
-    return "I apologize, but I couldn't properly analyze your question. Could you please rephrase or provide more context?"
 
 
-def _load_agent_config() -> Tuple[str, str, str]:
-    """
-    Load agent configuration from agent.md file.
-
-    Returns:
-        Tuple[str, str, str]: (name, description, system_prompt)
-    """
-    # Get agent config file path from environment variable or use default
-    config_file = os.getenv("AGENT_CONFIG_FILE", os.path.join(os.path.dirname(__file__), "agent.md"))
-
-    if not os.path.exists(config_file):
-        print(f"Agent config file not found at {config_file}")
-        # Try fallback to cloudbot.md
-        fallback_config = os.path.join(os.path.dirname(__file__), "cloudbot.md")
-        if os.path.exists(fallback_config):
-            print(f"Using fallback configuration: {fallback_config}")
-            config_file = fallback_config
-        else:
-            raise FileNotFoundError(f"No agent configuration file found. Please provide either {config_file} or set AGENT_CONFIG_FILE environment variable.")
-
-    try:
-        with open(config_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        # Parse the markdown content
-        name = _extract_section(content, "Agent Name")
-        description = _extract_section(content, "Agent Description")
-        system_prompt = _extract_section(content, "System Prompt")
-
-        if not name or not description or not system_prompt:
-            raise ValueError(f"Agent configuration file {config_file} is missing required sections: Agent Name, Agent Description, or System Prompt")
-
-        return name.strip(), description.strip(), system_prompt.strip()
-
-    except Exception as e:
-        print(f"Error reading agent config file {config_file}: {str(e)}")
-        raise
 
 
-def _extract_section(content: str, section_name: str) -> Optional[str]:
-    """
-    Extract a section from markdown content.
-
-    Args:
-        content: The markdown content
-        section_name: The section header to look for
-
-    Returns:
-        Optional[str]: The section content or None if not found
-    """
-    # Pattern to match ## Section Name followed by content until next ## or end
-    pattern = rf"##\s+{re.escape(section_name)}\s*\n(.*?)(?=\n##|\Z)"
-    match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
-
-    if match:
-        return match.group(1).strip()
-
-    return None
 
 def get_agent(messages: Optional[Messages]=None) -> Agent:
     """
@@ -107,9 +34,6 @@ def get_agent(messages: Optional[Messages]=None) -> Agent:
     """
     model_id = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-3-7-sonnet-20250219-v1:0")
     bedrock_model = BedrockModel(model_id=model_id)
-
-    # Load agent configuration from agent.md file
-    agent_name, agent_description, system_prompt = _load_agent_config()
 
     try:
         # Load and combine tools from all enabled MCP servers (cached)
@@ -239,4 +163,7 @@ def _create_mcp_client_from_config(server_name: str, server_config: Dict[str, An
 
 
 if __name__ == "__main__":
-    agent_tool("Hello, how can you help me?")
+    # Test the agent functionality
+    agent = get_agent()
+    response = agent("Hello, how can you help me?")
+    print(response)

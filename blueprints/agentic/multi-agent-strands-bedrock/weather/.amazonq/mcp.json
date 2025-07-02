@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "weather": {
+    "mcp-server": {
       "disabled": false,
       "command": "uv",
       "args": [

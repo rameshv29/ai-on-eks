@@ -42,12 +42,12 @@ test_weather_fastapi() {
     local description="$3"
 
     print_step "$step_num" "$description"
-    print_query "$query" "http://localhost:3001/prompt"
+    print_query "$query" "http://localhost:3000/prompt"
 
     echo -e "${GREEN}🚀 Sending request...${NC}"
 
     # Make the API call to FastAPI endpoint
-    response=$(curl -X POST http://localhost:3001/prompt \
+    response=$(curl -X POST http://localhost:3000/prompt \
         -H "Content-Type: application/json" \
         -H "Accept: application/json" \
         -d "{\"text\": \"$query\"}" \
@@ -77,7 +77,7 @@ test_weather_fastapi() {
         echo -e "${CYAN}└─────────────────────────────────────────────────────────────────────────────┘${NC}"
     else
         echo -e "${RED}❌ Error: Failed to connect to the weather agent FastAPI${NC}"
-        echo -e "${YELLOW}💡 Make sure the weather agent FastAPI is running on http://localhost:3001${NC}"
+        echo -e "${YELLOW}💡 Make sure the weather agent FastAPI is running on http://localhost:3000${NC}"
     fi
 
     echo ""
@@ -87,12 +87,12 @@ test_weather_fastapi() {
 test_health() {
     print_step "0" "Health Check"
     echo -e "${PURPLE}❓ Checking FastAPI agent health${NC}"
-    echo -e "${CYAN}🔗 Endpoint: http://localhost:3001/health${NC}"
+    echo -e "${CYAN}🔗 Endpoint: http://localhost:3000/health${NC}"
     echo ""
 
     echo -e "${GREEN}🚀 Sending health check...${NC}"
 
-    health_response=$(curl -X GET http://localhost:3001/health \
+    health_response=$(curl -X GET http://localhost:3000/health \
         --silent \
         --show-error \
         --max-time 10)
@@ -119,12 +119,12 @@ test_health() {
 test_docs() {
     print_step "0.5" "FastAPI Documentation Check"
     echo -e "${PURPLE}❓ Checking FastAPI documentation availability${NC}"
-    echo -e "${CYAN}🔗 Endpoint: http://localhost:3001/docs${NC}"
+    echo -e "${CYAN}🔗 Endpoint: http://localhost:3000/docs${NC}"
     echo ""
 
     echo -e "${GREEN}🚀 Checking docs endpoint...${NC}"
 
-    docs_response=$(curl -X GET http://localhost:3001/docs \
+    docs_response=$(curl -X GET http://localhost:3000/docs \
         --silent \
         --show-error \
         --max-time 10 \
@@ -133,7 +133,7 @@ test_docs() {
     if [ $? -eq 0 ]; then
         http_code=$(echo "$docs_response" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
         if [ "$http_code" = "200" ]; then
-            echo -e "${GREEN}✅ FastAPI docs available at http://localhost:3001/docs${NC}"
+            echo -e "${GREEN}✅ FastAPI docs available at http://localhost:3000/docs${NC}"
             echo -e "${CYAN}┌─────────────────────────────────────────────────────────────────────────────┐${NC}"
             echo -e "${NC}│ Interactive API documentation is accessible${NC}"
             echo -e "${NC}│ You can test endpoints directly in the browser${NC}"
@@ -161,7 +161,7 @@ main() {
     test_health
     if [ $? -ne 0 ]; then
         echo -e "${RED}⚠️  Cannot proceed with tests - FastAPI agent is not responding${NC}"
-        echo -e "${YELLOW}💡 Please ensure the weather agent FastAPI is running with: uvicorn app:app --host 0.0.0.0 --port 3001${NC}"
+        echo -e "${YELLOW}💡 Please ensure the weather agent FastAPI is running with: uvicorn app:app --host 0.0.0.0 --port 3000${NC}"
         exit 1
     fi
 
@@ -184,13 +184,13 @@ main() {
     echo -e "${CYAN}📊 Test Results:${NC}"
     echo -e "${YELLOW}   • Health Check: Passed ✅${NC}"
     echo -e "${YELLOW}   • Weather Forecasts: 6 queries tested 🌤️${NC}"
-    echo -e "${YELLOW}   • API Endpoints: FastAPI (port 3001) 🚀${NC}"
+    echo -e "${YELLOW}   • API Endpoints: FastAPI (port 3000) 🚀${NC}"
     echo -e "${YELLOW}   • Interactive Docs: Disabled for security 🔒${NC}"
     echo ""
     echo -e "${PURPLE}🔧 Additional Testing Options:${NC}"
     echo -e "${CYAN}   • MCP Protocol: Use test_e2e_mcp.py (port 8080)${NC}"
     echo -e "${CYAN}   • A2A Protocol: Use test_e2e_a2a.py (port 9000)${NC}"
-    echo -e "${CYAN}   • FastAPI:      Use test_e2e_fastapi.py or test_e2e_fastapi_curl.sh (port 3001)${NC}"
+    echo -e "${CYAN}   • FastAPI:      Use test_e2e_fastapi.py or test_e2e_fastapi_curl.sh (port 3000)${NC}"
     echo ""
     echo -e "${GREEN}🌐 FastAPI Features:${NC}"
     echo -e "${CYAN}   • Lightweight API: Docs disabled for production${NC}"

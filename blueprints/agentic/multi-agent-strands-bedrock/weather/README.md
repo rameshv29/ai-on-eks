@@ -106,7 +106,7 @@ graph TB
 
 **Key Components:**
 
-- **Triple Protocol Support**: Single pod serves MCP (port 8080), A2A (port 9000), and FastAPI (port 3001) protocols
+- **Triple Protocol Support**: Single pod serves MCP (port 8080), A2A (port 9000), and FastAPI (port 3000) protocols
 - **EKS Auto Mode**: Automatic node provisioning and management
 - **Pod Identity**: Secure access to Amazon Bedrock without storing credentials
 - **MCP Protocol**: Standardized interface for AI model communication via HTTP
@@ -443,7 +443,7 @@ You should see:
 INFO - Starting Weather Agent Triple Server...
 INFO - MCP Server will run on port 8080 with streamable-http
 INFO - A2A Server will run on port 9000
-INFO - FastAPI Server will run on port 3001
+INFO - FastAPI Server will run on port 3000
 INFO - Starting MCP Server
 INFO - Starting A2A Server
 INFO - Starting FastAPI Server
@@ -470,7 +470,7 @@ The weather agent supports three protocols simultaneously. You can access it thr
 ```bash
 # Port forward all three services
 kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
-  port-forward service/${KUBERNETES_APP_WEATHER_AGENT_NAME} 8080:mcp 9000:a2a 3001:fastapi
+  port-forward service/${KUBERNETES_APP_WEATHER_AGENT_NAME} 8080:mcp 9000:a2a 3000:fastapi
 ```
 
 #### Test the Agent with curl:
@@ -489,12 +489,12 @@ The expected output:
 📊 Test Results:
    • Health Check: Passed ✅
    • Weather Forecasts: 5 queries tested 🌤️
-   • API Endpoints: FastAPI (port 3001) 🔗
+   • API Endpoints: FastAPI (port 3000) 🔗
 
 🔧 Additional Testing Options:
    • MCP Protocol: Use test_e2e_mcp.py (port 8080)
    • A2A Protocol: Use test_e2e_a2a.py (port 9000)
-   • FastAPI:      Use test_e2e_fastapi.py or test_e2e_fastapi_curl.sh (port 3001)
+   • FastAPI:      Use test_e2e_fastapi.py or test_e2e_fastapi_curl.sh (port 3000)
 
 ✨ Workshop participants can now interact with the Weather Agent! ✨
 ...
@@ -508,8 +508,8 @@ The expected output:
 # In separate terminals, run each test client:
 uv run test_e2e_mcp.py        # Tests MCP Protocol (6 tests)
 uv run test_e2e_a2a.py        # Tests A2A Protocol (6 tests)
-uv run test_e2e_fastapi.py    # Tests FastAPI (6 tests)
-./test_e2e_fastapi_curl.sh    # Tests FastAPI (6 tests, colorized)
+uv run test_e2e_fastapi.py    # Tests FastAPI (6 tests) - requires DISABLE_AUTH=1 uv run fastapi-server
+./test_e2e_fastapi_curl.sh    # Tests FastAPI (6 tests, colorized) - requires DISABLE_AUTH=1 uv run fastapi-server
 ```
 
 #### Test Client Features
@@ -629,7 +629,12 @@ uv run test_e2e_a2a.py
 
 #### Run as FastAPI server
 ```bash
-uv run fastapi
+uv run fastapi-server
+```
+
+#### Run as FastAPI server (for testing without authentication)
+```bash
+DISABLE_AUTH=1 uv run fastapi-server
 ```
 
 #### Run the FastAPI client
@@ -680,7 +685,7 @@ Use test clients to verify all three protocols:
 ```bash
 uv run test_e2e_mcp.py        # Tests MCP Protocol
 uv run test_e2e_a2a.py        # Tests A2A Protocol
-uv run test_e2e_fastapi_curl.sh  # Tests FastAPI
+uv run test_e2e_fastapi_curl.sh  # Tests FastAPI (requires DISABLE_AUTH=1 in container)
 ```
 
 Now you can connect with the MCP client to `http://localhost:8080/mcp`.
