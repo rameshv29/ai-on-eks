@@ -41,20 +41,21 @@ logger = logging.getLogger(__name__)
 # Global variables
 PUBLIC_AGENT_CARD_PATH = "/.well-known/agent.json"
 WEATHER_URL = f"http://localhost:{os.getenv('WEATHER_A2A_PORT', '9000')}"
+CITYMAPPER_URL = f"http://localhost:{os.getenv('CITYMAPPER_A2A_PORT', '9001')}"
 
-async def send_message(message: str):
+async def send_message_to_agent(message: str, agent_url: str):
     async with httpx.AsyncClient(timeout=120) as httpx_client:
         # Initialize A2ACardResolver
         resolver = A2ACardResolver(
             httpx_client=httpx_client,
-            base_url=WEATHER_URL,
+            base_url=agent_url,
         )
 
         # Fetch Public Agent Card and Initialize Client
         agent_card: AgentCard | None = None
 
         try:
-            logger.info("Attempting to fetch public agent card from: {} {}", WEATHER_URL, PUBLIC_AGENT_CARD_PATH)
+            logger.info("Attempting to fetch public agent card from: {} {}", agent_url, PUBLIC_AGENT_CARD_PATH)
             agent_card = await resolver.get_agent_card()  # Fetches from default public path
             logger.info("Successfully fetched public agent card:")
             logger.info(agent_card.model_dump_json(indent=2, exclude_none=True))
@@ -90,7 +91,7 @@ def get_weather(query: str) -> str:
         # Run with a timeout
         return loop.run_until_complete(
             asyncio.wait_for(
-                send_message(query),
+                send_message_to_agent(query, WEATHER_URL),
                 timeout=120.0  # 2 minute timeout
             )
         )
@@ -100,6 +101,31 @@ def get_weather(query: str) -> str:
     except Exception as e:
         logger.error(f"Error in get_weather: {e}")
         return f"Error retrieving weather information: {str(e)}"
+    finally:
+        loop.close()
+
+@tool
+def get_travel_planning(query: str) -> str:
+    """Get travel planning information including destinations, activities, dining, and interactive travel plans."""
+    logger.info(f"Travel planning query: {query}")
+    # Use a dedicated event loop for this call
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        # Run with a timeout
+        return loop.run_until_complete(
+            asyncio.wait_for(
+                send_message_to_agent(query, CITYMAPPER_URL),
+                timeout=120.0  # 2 minute timeout
+            )
+        )
+    except asyncio.TimeoutError:
+        logger.error("Travel planning query timed out after 120 seconds")
+        return "Travel planning request timed out. Please try again or check with a travel service directly."
+    except Exception as e:
+        logger.error(f"Error in get_travel_planning: {e}")
+        return f"Error retrieving travel planning information: {str(e)}"
     finally:
         loop.close()
 
@@ -114,7 +140,7 @@ def main():
         travel_agent = Agent(
             model=bedrock_model,
             system_prompt=PROMPT,
-            tools=[get_weather]
+            tools=[get_weather, get_travel_planning]
         )
 
         logger.info("Travel agent successfully created with system prompt and weather tool")

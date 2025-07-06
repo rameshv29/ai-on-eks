@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "activities-mcp-stdio": {
+      "disabled": false,
+      "timeout": 60000,
+      "command": "uvx",
+      "args": [
+        "--from",
+        ".",
+        "--directory",
+        "mcp-servers/activities-mcp-server",
+        "mcp-server",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "DEBUG": "1",
+        "LOG_LEVEL": "INFO"
+      }
+    },
+    "mapper-mcp-stdio": {
+      "disabled": false,
+      "timeout": 60000,
+      "command": "uvx",
+      "args": [
+        "--from",
+        ".",
+        "--directory",
+        "mcp-servers/mapper-mcp-server",
+        "mcp-server",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "DEBUG": "1",
+        "LOG_LEVEL": "INFO"
+      }
+    },
+    "activities-mcp-http": {
+      "disabled": true,
+      "timeout": 60000,
+      "url": "http://activities-mcp-server:8080/mcp"
+    },
+    "mapper-mcp-http": {
+      "disabled": true,
+      "timeout": 60000,
+      "url": "http://mapper-mcp-server:8080/mcp"
+    }
+  }
+}

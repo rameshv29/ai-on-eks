@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "citymapper-agent.fullname" . }}
+  labels:
+    {{- include "citymapper-agent.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.agent.mcp.port }}
+      targetPort: mcp
+      protocol: TCP
+      name: mcp
+    - port: {{ .Values.agent.a2a.port }}
+      targetPort: a2a
+      protocol: TCP
+      name: a2a
+    - port: {{ .Values.agent.fastapi.port }}
+      targetPort: fastapi
+      protocol: TCP
+      name: fastapi
+  selector:
+    {{- include "citymapper-agent.selectorLabels" . | nindent 4 }}
