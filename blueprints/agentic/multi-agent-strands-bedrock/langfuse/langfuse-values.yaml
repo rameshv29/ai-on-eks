@@ -1,0 +1,99 @@
+# Langfuse Production Values for EKS
+nameOverride: "langfuse"
+fullnameOverride: "langfuse"
+
+# Image configuration
+image:
+  repository: langfuse/langfuse
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 3000
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: langfuse.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Environment variables
+env:
+  - name: DATABASE_URL
+    value: "postgresql://langfuse:langfuse@langfuse-postgresql:5432/langfuse"
+  - name: NEXTAUTH_URL
+    value: "http://localhost:3000"
+  - name: NEXTAUTH_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: langfuse-secrets
+        key: nextauth-secret
+  - name: SALT
+    valueFrom:
+      secretKeyRef:
+        name: langfuse-secrets
+        key: salt
+  - name: TELEMETRY_ENABLED
+    value: "false"
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    username: langfuse
+    password: langfuse
+    database: langfuse
+    postgresPassword: postgres
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+# Resource configuration
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+# Autoscaling
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# Node selection
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000

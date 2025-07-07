@@ -1,0 +1,162 @@
+{
+  "destinations": {
+    "san_francisco": {
+      "name": "San Francisco",
+      "country": "United States",
+      "description": "A vibrant city known for its iconic Golden Gate Bridge, steep hills, eclectic architecture, and diverse neighborhoods.",
+      "popular_areas": [
+        "Union Square",
+        "Fisherman's Wharf",
+        "Chinatown",
+        "North Beach",
+        "Mission District",
+        "Castro District",
+        "Haight-Ashbury",
+        "SoMa (South of Market)"
+      ],
+      "indoor_activities": [
+        {
+          "id": "sf_moma",
+          "name": "San Francisco Museum of Modern Art",
+          "description": "World-class modern and contemporary art museum",
+          "categories": ["culture", "art", "museum"],
+          "duration": "half-day",
+          "nearby_dining": [
+            {
+              "name": "In Situ",
+              "type": "fine dining",
+              "cuisine": "international",
+              "distance": "0.1 miles"
+            }
+          ]
+        },
+        {
+          "id": "exploratorium",
+          "name": "Exploratorium",
+          "description": "Interactive science museum with hands-on exhibits",
+          "categories": ["science", "family", "interactive"],
+          "duration": "half-day",
+          "nearby_dining": [
+            {
+              "name": "Pier Market Seafood Restaurant",
+              "type": "casual dining",
+              "cuisine": "seafood",
+              "distance": "0.2 miles"
+            }
+          ]
+        }
+      ],
+      "outdoor_activities": [
+        {
+          "id": "golden_gate_bridge",
+          "name": "Golden Gate Bridge",
+          "description": "Iconic suspension bridge and San Francisco landmark",
+          "categories": ["landmark", "photography", "walking"],
+          "duration": "short",
+          "nearby_dining": [
+            {
+              "name": "Warming Hut",
+              "type": "cafe",
+              "cuisine": "american",
+              "distance": "0.3 miles"
+            }
+          ]
+        },
+        {
+          "id": "golden_gate_park",
+          "name": "Golden Gate Park",
+          "description": "Large urban park with gardens, museums, and recreational activities",
+          "categories": ["nature", "park", "outdoor"],
+          "duration": "full-day",
+          "nearby_dining": [
+            {
+              "name": "Beach Chalet Brewery",
+              "type": "brewery",
+              "cuisine": "american",
+              "distance": "0.1 miles"
+            }
+          ]
+        }
+      ]
+    },
+    "new_york": {
+      "name": "New York City",
+      "country": "United States",
+      "description": "The city that never sleeps, known for its skyline, Broadway shows, world-class museums, and diverse neighborhoods.",
+      "popular_areas": [
+        "Times Square",
+        "Central Park",
+        "Greenwich Village",
+        "SoHo",
+        "Brooklyn Bridge",
+        "High Line",
+        "Chelsea Market",
+        "Lower East Side"
+      ],
+      "indoor_activities": [
+        {
+          "id": "met_museum",
+          "name": "Metropolitan Museum of Art",
+          "description": "One of the world's largest and most prestigious art museums",
+          "categories": ["culture", "art", "museum"],
+          "duration": "full-day",
+          "nearby_dining": [
+            {
+              "name": "The Dining Room at The Met",
+              "type": "fine dining",
+              "cuisine": "american",
+              "distance": "0.0 miles"
+            }
+          ]
+        },
+        {
+          "id": "broadway_show",
+          "name": "Broadway Show",
+          "description": "World-famous theater district with top-tier productions",
+          "categories": ["entertainment", "theater", "culture"],
+          "duration": "evening",
+          "nearby_dining": [
+            {
+              "name": "Sardi's",
+              "type": "fine dining",
+              "cuisine": "american",
+              "distance": "0.1 miles"
+            }
+          ]
+        }
+      ],
+      "outdoor_activities": [
+        {
+          "id": "central_park",
+          "name": "Central Park",
+          "description": "Iconic urban park in the heart of Manhattan",
+          "categories": ["nature", "park", "outdoor"],
+          "duration": "half-day",
+          "nearby_dining": [
+            {
+              "name": "Tavern on the Green",
+              "type": "fine dining",
+              "cuisine": "american",
+              "distance": "0.0 miles"
+            }
+          ]
+        },
+        {
+          "id": "high_line",
+          "name": "High Line",
+          "description": "Elevated park built on former railway tracks",
+          "categories": ["park", "walking", "urban"],
+          "duration": "short",
+          "nearby_dining": [
+            {
+              "name": "Chelsea Market",
+              "type": "food hall",
+              "cuisine": "various",
+              "distance": "0.1 miles"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

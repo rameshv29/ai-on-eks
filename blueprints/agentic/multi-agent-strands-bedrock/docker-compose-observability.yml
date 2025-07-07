@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # Self-hosted Langfuse
+  langfuse-db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse
+      POSTGRES_DB: langfuse
+    volumes:
+      - langfuse_db_data:/var/lib/postgresql/data
+    networks:
+      - observability-network
+
+  langfuse:
+    image: langfuse/langfuse:latest
+    depends_on:
+      - langfuse-db
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+      NEXTAUTH_URL: http://localhost:3001
+      NEXTAUTH_SECRET: mysecret
+      SALT: mysalt
+      TELEMETRY_ENABLED: false
+    networks:
+      - observability-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/public/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Citymapper with observability
+  citymapper:
+    build:
+      context: ./citymapper
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # MCP
+      - "9002:9000"  # A2A
+      - "3000:3000"  # FastAPI
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
+      - MCP_PORT=8080
+      - A2A_PORT=9000
+      - FASTAPI_PORT=3000
+      # Langfuse observability
+      - LANGFUSE_PUBLIC_KEY=pk-lf-local-test
+      - LANGFUSE_SECRET_KEY=sk-lf-local-test
+      - LANGFUSE_HOST=http://langfuse:3000
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    networks:
+      - observability-network
+    depends_on:
+      langfuse:
+        condition: service_healthy
+
+  # Weather agent with observability
+  weather:
+    build:
+      context: ./weather
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"  # MCP
+      - "9003:9000"  # A2A
+      - "3002:3000"  # FastAPI
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
+      - MCP_PORT=8080
+      - A2A_PORT=9000
+      - FASTAPI_PORT=3000
+      # Langfuse observability
+      - LANGFUSE_PUBLIC_KEY=pk-lf-local-test
+      - LANGFUSE_SECRET_KEY=sk-lf-local-test
+      - LANGFUSE_HOST=http://langfuse:3000
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    networks:
+      - observability-network
+    depends_on:
+      langfuse:
+        condition: service_healthy
+
+volumes:
+  langfuse_db_data:
+
+networks:
+  observability-network:
+    driver: bridge

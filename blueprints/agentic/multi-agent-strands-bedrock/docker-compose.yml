@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  orchestrator:
+    build:
+      context: ./orchestrator
+      dockerfile: ../weather/Dockerfile
+    ports:
+      - "9001:9000"  # A2A port
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
+      - A2A_PORT=9000
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    networks:
+      - agent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/.well-known/agent.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  citymapper:
+    build:
+      context: ./citymapper
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # MCP port
+      - "9002:9000"  # A2A port
+      - "3000:3000"  # FastAPI port
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
+      - MCP_PORT=8080
+      - A2A_PORT=9000
+      - FASTAPI_PORT=3000
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    networks:
+      - agent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - orchestrator
+
+  weather:
+    build:
+      context: ./weather
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"  # MCP port
+      - "9003:9000"  # A2A port
+      - "3001:3000"  # FastAPI port
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
+      - MCP_PORT=8080
+      - A2A_PORT=9000
+      - FASTAPI_PORT=3000
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    networks:
+      - agent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  agent-network:
+    driver: bridge
