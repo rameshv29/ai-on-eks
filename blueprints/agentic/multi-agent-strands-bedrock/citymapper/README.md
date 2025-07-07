@@ -113,6 +113,44 @@ Currently supports:
 
 Additional destinations can be added to `activities_data.json`.
 
+## Deployment
+
+### Production Deployment
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guides:
+- 🚀 **EKS Deployment** with Helm charts
+- 🐳 **Docker Compose** for local/development
+- 📊 **Observability Setup** with self-hosted Langfuse
+- 🧪 **Testing & Monitoring** procedures
+
+### Quick Docker Compose Start
+```bash
+# Deploy with observability
+./deploy-docker-compose.sh
+
+# Access services
+open http://localhost:3000  # Citymapper FastAPI
+open http://localhost:3001  # Langfuse UI
+```
+
+## Deployment
+
+### Production Deployment
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guides:
+- 🚀 **EKS Deployment** with Helm charts
+- 🐳 **Docker Compose** for local/development
+- 📊 **Observability Setup** with self-hosted Langfuse
+- 🧪 **Testing & Monitoring** procedures
+
+### Quick Docker Compose Start
+```bash
+# Deploy with observability
+./deploy-docker-compose.sh
+
+# Access services
+open http://localhost:3000  # Citymapper FastAPI
+open http://localhost:3001  # Langfuse UI
+```
+
 ## Dependencies
 
 - strands-agents[a2a] >= 0.1.9
@@ -121,3 +159,7 @@ Additional destinations can be added to `activities_data.json`.
 - fastapi >= 0.104.0
 - boto3 >= 1.34.0
 - rich, uvicorn, pyjwt, cryptography
+- langfuse >= 3.1.0 (observability)
+- ragas >= 0.2.0 (quality evaluation)
+- langfuse >= 3.1.0 (observability)
+- ragas >= 0.2.0 (quality evaluation)

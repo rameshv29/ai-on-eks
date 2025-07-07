@@ -2,7 +2,7 @@
 nameOverride: "langfuse"
 fullnameOverride: "langfuse"
 
-# Image configuration
+# Image configuration (official Langfuse)
 image:
   repository: langfuse/langfuse
   tag: "latest"

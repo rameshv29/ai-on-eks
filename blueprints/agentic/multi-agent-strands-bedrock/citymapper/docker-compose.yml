@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Langfuse observability stack
+  langfuse-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse
+      POSTGRES_DB: langfuse
+    volumes:
+      - langfuse_db:/var/lib/postgresql/data
+    networks:
+      - citymapper-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  langfuse:
+    image: langfuse/langfuse:latest
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+      NEXTAUTH_URL: http://localhost:3001
+      NEXTAUTH_SECRET: mysecret
+      SALT: mysalt
+      TELEMETRY_ENABLED: false
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+    networks:
+      - citymapper-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/public/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Citymapper agent
+  citymapper:
+    build: .
+    ports:
+      - "8080:8080"  # MCP
+      - "9000:9000"  # A2A  
+      - "3000:3000"  # FastAPI
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
+      - MCP_PORT=8080
+      - A2A_PORT=9000
+      - FASTAPI_PORT=3000
+      # Langfuse observability
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-pk-lf-local-test}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-sk-lf-local-test}
+      - LANGFUSE_HOST=http://langfuse:3000
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    networks:
+      - citymapper-network
+    depends_on:
+      langfuse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  langfuse_db:
+
+networks:
+  citymapper-network:
+    driver: bridge
