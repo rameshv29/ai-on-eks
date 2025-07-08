@@ -37,7 +37,13 @@ graph TB
 
     subgraph "AWS Cloud"
         subgraph "Amazon ECR"
-            ECR[Container Registry]
+            ECR_UI[Weather UI Image]
+            ECR_AGENT[Weather Agent Image]
+            ECR_MCP[Weather MCP Image]
+        end
+
+        subgraph "Amazon Cognito"
+            COGNITO[User Pool<br/>Authentication]
         end
 
         subgraph "Amazon Bedrock"
@@ -50,69 +56,87 @@ graph TB
                 ETCD[etcd]
             end
 
-            subgraph "Data Plane"
-                subgraph "Worker Node"
-                    POD[Weather AI Agent<br/>MCP:8080 A2A:9000 REST:3000<br/>MCP Tools: alert, forecast]
+            subgraph "Data Plane - weather-agent namespace"
+                subgraph "Web UI Pod"
+                    UI_POD[Weather UI<br/>FastAPI:8000<br/>Cognito Auth]
+                    UI_SVC[weather-ui Service<br/>Port 8000]
+                end
+
+                subgraph "Agent Pod"
+                    AGENT_POD[Weather Agent<br/>MCP:8080 A2A:9000 REST:3000]
+                    AGENT_SVC[weather-agent Service<br/>Ports 8080/9000/3000]
+                end
+
+                subgraph "MCP Server Pod"
+                    MCP_POD[Weather MCP Server<br/>HTTP:8080<br/>Tools: forecast, alert]
+                    MCP_SVC[weather-mcp Service<br/>Port 8080]
                 end
             end
 
             subgraph "K8s Resources"
-                SVC[Service<br/>8080 + 9000 + 3000]
-                SA[ServiceAccount]
-                DEPLOY[Deployment]
+                SA_AGENT[weather-agent ServiceAccount]
             end
         end
 
         subgraph "AWS IAM"
-            ROLE[Pod Identity Role]
-            POLICY[Bedrock Policy]
+            ROLE_AGENT[Agent Pod Identity Role]
+            POLICY_BEDROCK[Bedrock Access Policy]
         end
     end
 
-    subgraph "Client Applications"
-        MCP_CLIENT[MCP Client<br/>:8080]
-        A2A_CLIENT[A2A Client<br/>:9000]
-        REST_CLIENT[REST Client<br/>:3000]
+    subgraph "End Users"
+        USER[Web Browser<br/>User Login]
     end
 
-    DEV -->|Build| DOCKER
-    DOCKER -->|Push| ECR
-    DEV -->|Deploy| HELM
-    HELM -->|Create| API
+    DEV -->|Build & Push| ECR_UI
+    DEV -->|Build & Push| ECR_AGENT
+    DEV -->|Build & Push| ECR_MCP
+    DEV -->|Deploy 3 Helm Charts| HELM
+    HELM -->|Create Resources| API
 
-    API -->|Schedule| POD
-    SVC -->|Route| POD
+    API -->|Schedule| UI_POD
+    API -->|Schedule| AGENT_POD
+    API -->|Schedule| MCP_POD
 
-    SA -->|Assume| ROLE
-    ROLE -->|Attached| POLICY
-    POD -->|Invoke| BEDROCK
+    UI_SVC -->|Route| UI_POD
+    AGENT_SVC -->|Route| AGENT_POD
+    MCP_SVC -->|Route| MCP_POD
 
-    MCP_CLIENT -->|HTTP :8080| SVC
-    A2A_CLIENT -->|HTTP :9000| SVC
-    REST_CLIENT -->|HTTP :3000| SVC
+    SA_AGENT -->|Assume| ROLE_AGENT
+    ROLE_AGENT -->|Attached| POLICY_BEDROCK
 
-    POD -->|Pull| ECR
+    UI_POD -->|Pull| ECR_UI
+    AGENT_POD -->|Pull| ECR_AGENT
+    MCP_POD -->|Pull| ECR_MCP
+
+    USER -->|HTTPS Login| COGNITO
+    USER -->|Authenticated Web UI| UI_SVC
+    UI_POD -->|Cognito JWT Validation| COGNITO
+    UI_POD -->|REST API :3000| AGENT_SVC
+    AGENT_POD -->|MCP HTTP :8080| MCP_SVC
+    AGENT_POD -->|Invoke LLM| BEDROCK
 
     classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:#fff
     classDef k8s fill:#326CE5,stroke:#fff,stroke-width:2px,color:#fff
     classDef dev fill:#2E8B57,stroke:#fff,stroke-width:2px,color:#fff
-    classDef client fill:#9370DB,stroke:#fff,stroke-width:2px,color:#fff
+    classDef user fill:#9370DB,stroke:#fff,stroke-width:2px,color:#fff
 
-    class ECR,BEDROCK,ROLE,POLICY aws
-    class API,ETCD,POD,SVC,SA,DEPLOY k8s
+    class ECR_UI,ECR_AGENT,ECR_MCP,BEDROCK,COGNITO,ROLE_AGENT,POLICY_BEDROCK aws
+    class API,ETCD,UI_POD,AGENT_POD,MCP_POD,UI_SVC,AGENT_SVC,MCP_SVC,SA_AGENT k8s
     class DEV,DOCKER,HELM dev
-    class MCP_CLIENT,A2A_CLIENT,REST_CLIENT client
+    class USER user
 ```
 
 **Key Components:**
 
-- **Triple Protocol Support**: Single pod serves MCP (port 8080), A2A (port 9000), and FastAPI (port 3000) protocols
+- **Three-Service Architecture**: Separate deployments for Web UI (port 8000), Agent Service (ports 8080/9000/3000), and MCP Server (port 8080)
+- **Web UI with Authentication**: FastAPI-based frontend with Amazon Cognito integration for user authentication
+- **Agent Service**: Triple protocol support serving MCP (port 8080), A2A (port 9000), and REST API (port 3000)
+- **MCP Server**: Dedicated weather tools server providing forecast and alert capabilities via HTTP
 - **EKS Auto Mode**: Automatic node provisioning and management
 - **Pod Identity**: Secure access to Amazon Bedrock without storing credentials
-- **MCP Protocol**: Standardized interface for AI model communication via HTTP
-- **A2A Protocol**: Agent-to-Agent communication for multi-agent workflows
-- **FastAPI**: Modern Python web framework with automatic API documentation
-- **Container Registry**: Stores the weather agent container image
+- **Three Helm Charts**: Separate deployments from `helm/`, `web/helm/`, and `mcp-servers/weather-mcp-server/helm/`
+- **Container Registry**: Stores three separate container images for each service
 
 ---
 
@@ -480,7 +504,6 @@ Deploy the weather agent using Helm:
 ```bash
 helm upgrade ${KUBERNETES_APP_WEATHER_AGENT_UI_NAME} web/helm --install \
   --namespace ${KUBERNETES_APP_WEATHER_AGENT_UI_NAMESPACE} --create-namespace \
-  --set serviceAccount.name=${KUBERNETES_APP_WEATHER_AGENT_UI_SERVICE_ACCOUNT} \
   --set image.repository=${ECR_REPO_WEATHER_AGENT_UI_URI} \
   --set image.pullPolicy=Always \
   --set env.COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID} \

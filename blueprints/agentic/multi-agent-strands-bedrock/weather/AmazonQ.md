@@ -5,16 +5,18 @@
 
 ## 🎯 Project State Summary
 
-**Current Status**: Production-ready triple-protocol AI agent with EKS deployment capability
-**Key Achievement**: Single container serving MCP (port 8080), A2A (port 9000), and FastAPI (port 3000) protocols concurrently
+**Current Status**: Production-ready three-service AI agent architecture with EKS deployment capability
+**Key Achievement**: Three separate services - Web UI with Cognito auth, Agent service with triple protocols, and dedicated MCP server
 
 ## 🏗️ Technical Architecture
 
 ### Core Implementation
-- **Triple Server**: ThreadPoolExecutor-based concurrent MCP/A2A/FastAPI servers in `main.py`
-- **Default Transport**: streamable-http (changed from stdio for container compatibility)
-- **Multi-Architecture**: AMD64/ARM64 support via docker buildx
-- **Security**: EKS Pod Identity for Bedrock access (no credential storage)
+- **Three-Service Architecture**: Separate Helm deployments for Web UI, Agent Service, and MCP Server
+- **Web UI Service**: FastAPI frontend with Amazon Cognito authentication (port 8000)
+- **Agent Service**: Triple protocol support - MCP (8080), A2A (9000), REST API (3000)
+- **MCP Server**: Dedicated weather tools server providing forecast/alert capabilities (port 8080)
+- **Multi-Architecture**: AMD64/ARM64 support via docker buildx for all three services
+- **Security**: EKS Pod Identity for Bedrock access, Cognito JWT validation for web access
 
 ### File Structure (AI Agent Reference)
 ```
