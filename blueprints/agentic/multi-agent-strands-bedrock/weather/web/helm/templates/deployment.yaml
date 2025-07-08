@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mcp.fullname" . }}
+  name: {{ include "ui.fullname" . }}
   labels:
-    {{- include "mcp.labels" . | nindent 4 }}
+    {{- include "ui.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "mcp.selectorLabels" . | nindent 6 }}
+      {{- include "ui.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "mcp.labels" . | nindent 8 }}
+        {{- include "ui.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "mcp.serviceAccountName" . }}
+      serviceAccountName: {{ include "ui.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -41,8 +41,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: MCP_PORT
-              value: "{{ .Values.mcp.port }}"
+            - name: FASTAPI_PORT
+              value: "{{ .Values.fastapi.port }}"
             {{- if .Values.env }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
@@ -50,8 +50,8 @@ spec:
             {{- end }}
             {{- end }}
           ports:
-            - name: mcp
-              containerPort: {{ .Values.mcp.port }}
+            - name: fastapi
+              containerPort: {{ .Values.fastapi.port }}
               protocol: TCP
           {{- with .Values.livenessProbe }}
           livenessProbe:

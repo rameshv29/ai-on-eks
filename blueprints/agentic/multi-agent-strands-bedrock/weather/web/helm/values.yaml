@@ -1,4 +1,4 @@
-# Default values for mcp.
+# Default values for agent.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -14,10 +14,19 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-# MCP Config
+# Web UI Config
 
-mcp:
-  port: 8080
+env:
+  COGNITO_CLIENT_ID: "to-be-replace"
+  COGNITO_CLIENT_SECRET: "to-be-replace"
+  COGNITO_SIGNIN_URL: "to-be-replace"
+  COGNITO_LOGOUT_URL: "to-be-replace"
+  COGNITO_WELL_KNOWN_URL: "to-be-replace"
+  COGNITO_JWKS_URL: "to-be-replace"
+  AGENT_ENDPOINT_URL: "to-be-replace"
+
+fastapi:
+  port: 8000
   ingress:
     enabled: false
 
@@ -31,7 +40,7 @@ fullnameOverride: ""
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
@@ -96,10 +105,10 @@ resources: {}
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
   tcpSocket:
-    port: 8080
+    port: 8000
 readinessProbe:
   tcpSocket:
-    port: 8080
+    port: 8000
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:

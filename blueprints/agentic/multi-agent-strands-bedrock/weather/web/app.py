@@ -82,7 +82,9 @@ with gr.Blocks() as gradio_app:
 gr.mount_gradio_app(fastapi_app, gradio_app, path="/chat", auth_dependency=check_auth)
 
 def main():
-    uvicorn.run(fastapi_app, host="0.0.0.0", port=8000)
+    host = os.getenv("FASTAPI_HOST", "0.0.0.0")
+    port = int(os.getenv("FASTAPI_PORT", "8000"))
+    uvicorn.run(fastapi_app, host=host, port=port)
 
 if __name__ == "__main__":
     main()

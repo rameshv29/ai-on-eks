@@ -147,18 +147,34 @@ export AWS_REGION=us-west-2
 export CLUSTER_NAME=agentic-ai-on-eks
 
 # Kubernetes Configuration
+export KUBERNETES_APP_WEATHER_MCP_NAMESPACE=weather-agent
+export KUBERNETES_APP_WEATHER_MCP_NAME=weather-mcp
+
 export KUBERNETES_APP_WEATHER_AGENT_NAMESPACE=weather-agent
 export KUBERNETES_APP_WEATHER_AGENT_NAME=weather-agent
 export KUBERNETES_APP_WEATHER_AGENT_SERVICE_ACCOUNT=weather-agent
 
+export KUBERNETES_APP_WEATHER_AGENT_UI_NAMESPACE=weather-agent
+export KUBERNETES_APP_WEATHER_AGENT_UI_NAME=weather-ui
+export KUBERNETES_APP_WEATHER_AGENT_UI_SERVICE_ACCOUNT=weather-ui
+
+
 # ECR Configuration
-export ECR_REPO_NAME=agents-on-eks/weather-agent
 export ECR_REPO_HOST=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
+export ECR_REPO_MCP_NAME=agents-on-eks/weather-mcp
+export ECR_REPO_WEATHER_MCP_URI=${ECR_REPO_HOST}/${ECR_REPO_MCP_NAME}
+
+export ECR_REPO_NAME=agents-on-eks/weather-agent
 export ECR_REPO_WEATHER_AGENT_URI=${ECR_REPO_HOST}/${ECR_REPO_NAME}
+
+export ECR_REPO_UI_NAME=agents-on-eks/weather-agent-ui
+export ECR_REPO_WEATHER_AGENT_UI_URI=${ECR_REPO_HOST}/${ECR_REPO_UI_NAME}
 
 # Amazon Bedrock Configuration
 export BEDROCK_MODEL_ID=us.anthropic.claude-3-7-sonnet-20250219-v1:0
 export BEDROCK_PODIDENTITY_IAM_ROLE=${CLUSTER_NAME}-bedrock-role
+
 
 # Agent Configuration (Optional)
 # export AGENT_CONFIG_FILE=/path/to/custom/agent.md  # Override default agent.md
@@ -328,7 +344,13 @@ aws eks create-pod-identity-association \
 
 ### Container Registry Setup
 
-#### Step 1: Create ECR Repository
+#### Step 1: Create ECR Repositories
+
+Create a private ECR repository for the weather mcp image:
+
+```bash
+aws ecr create-repository --repository-name ${ECR_REPO_MCP_NAME}
+```
 
 Create a private ECR repository for the weather agent image:
 
@@ -362,6 +384,32 @@ docker buildx use multiarch
 
 Build the image for both AMD64 and ARM64 architectures:
 
+MCP Server:
+```bash
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t ${ECR_REPO_WEATHER_MCP_URI}:latest \
+  --push mcp-servers/weather-mcp-server
+```
+
+```bash
+cat > mcp.json << 'EOF'
+{
+  "mcpServers": {
+    "weather-mcp-http": {
+      "disabled": false,
+      "timeout": 60000,
+      "url": "http://weather-mcp:8080/mcp"
+    }
+  }
+}
+EOF
+```
+
+
+
+
+Agent:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
@@ -388,7 +436,16 @@ You should see entries for both `linux/amd64` and `linux/arm64`.
 
 ### Deploy to Kubernetes
 
-Load the extra environment variables to be used in Helm:
+Deploy the MCP Servers first:
+```bash
+helm upgrade ${KUBERNETES_APP_WEATHER_MCP_NAME} mcp-servers/weather-mcp-server/helm --install \
+  --namespace ${KUBERNETES_APP_WEATHER_MCP_NAMESPACE} --create-namespace \
+  --set image.repository=${ECR_REPO_WEATHER_MCP_URI} \
+  --set image.pullPolicy=Always \
+  --set image.tag=latest
+```
+
+Load the extra environment variables for the Agent:
 ```bash
 source .env
 ```
@@ -473,38 +530,56 @@ kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
 The weather agent supports three protocols simultaneously. You can access it through port forwarding for development or test it using the provided test clients.
 
 
+#### Deploy the Weather Web Chat UI
+
+Create a private ECR repository for the weather agent image:
+
+```bash
+aws ecr create-repository --repository-name ${ECR_REPO_UI_NAME}
+```
+
+Build the image for both AMD64 and ARM64 architectures:
+
+```bash
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t ${ECR_REPO_WEATHER_AGENT_UI_URI}:latest \
+  --push web
+```
+
+Load the extra environment variables to be used in Helm:
+```bash
+source web/.env
+```
+
+Deploy the weather agent using Helm:
+```bash
+helm upgrade ${KUBERNETES_APP_WEATHER_AGENT_UI_NAME} web/helm --install \
+  --namespace ${KUBERNETES_APP_WEATHER_AGENT_UI_NAMESPACE} --create-namespace \
+  --set serviceAccount.name=${KUBERNETES_APP_WEATHER_AGENT_UI_SERVICE_ACCOUNT} \
+  --set image.repository=${ECR_REPO_WEATHER_AGENT_UI_URI} \
+  --set image.pullPolicy=Always \
+  --set env.COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID} \
+  --set env.COGNITO_CLIENT_SECRET=${COGNITO_CLIENT_SECRET} \
+  --set env.COGNITO_SIGNIN_URL=${COGNITO_SIGNIN_URL} \
+  --set env.COGNITO_LOGOUT_URL=${COGNITO_LOGOUT_URL} \
+  --set env.COGNITO_WELL_KNOWN_URL=${COGNITO_WELL_KNOWN_URL} \
+  --set env.COGNITO_JWKS_URL=${COGNITO_JWKS_URL} \
+  --set env.AGENT_ENDPOINT_URL="http://${KUBERNETES_APP_WEATHER_AGENT_NAME}:3000/prompt" \
+  --set image.tag=latest
+```
+
+#### Run Weather UI with Port forward
+
+```bash
+kubectl --namespace weather-agent port-forward svc/weather-ui 8000:fastapi
+```
+
 #### Run Port forward to expose the agent locally
 ```bash
 # Port forward all three services
 kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
   port-forward service/${KUBERNETES_APP_WEATHER_AGENT_NAME} 8080:mcp 9000:a2a 3000:fastapi
-```
-
-#### Test the Agent with curl:
-```bash
-# Chat with weather agent
-./test_e2e_fastapi_curl.sh
-```
-The expected output:
-```
-...
-═══════════════════════════════════════════════════════════════════════════════
-🌤️  Workshop Test Summary
-═══════════════════════════════════════════════════════════════════════════════
-
-🎉 Weather Agent API testing completed!
-📊 Test Results:
-   • Health Check: Passed ✅
-   • Weather Forecasts: 5 queries tested 🌤️
-   • API Endpoints: FastAPI (port 3000) 🔗
-
-🔧 Additional Testing Options:
-   • MCP Protocol: Use test_e2e_mcp.py (port 8080)
-   • A2A Protocol: Use test_e2e_a2a.py (port 9000)
-   • FastAPI:      Use test_e2e_fastapi.py or test_e2e_fastapi_curl.sh (port 3000)
-
-✨ Workshop participants can now interact with the Weather Agent! ✨
-...
 ```
 
 

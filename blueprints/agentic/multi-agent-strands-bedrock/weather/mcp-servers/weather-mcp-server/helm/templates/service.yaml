@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "agent.fullname" . }}
+  name: {{ include "mcp.fullname" . }}
   labels:
-    {{- include "agent.labels" . | nindent 4 }}
+    {{- include "mcp.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: mcp
   selector:
-    {{- include "agent.selectorLabels" . | nindent 4 }}
+    {{- include "mcp.selectorLabels" . | nindent 4 }}
