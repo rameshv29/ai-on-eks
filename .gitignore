@@ -49,6 +49,12 @@ site
 # venv
 **/.venv/*
 
+# Python cache files
+**/__pycache__/
+*.py[cod]
+*$py.class
+blueprints/agentic/multi-agent-strands-bedrock/test_bedrock.py
+
 # gradio
 **/gradio_cached_examples
 
