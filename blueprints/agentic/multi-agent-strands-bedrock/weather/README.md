@@ -252,92 +252,16 @@ The agent configuration is loaded at runtime with the following priority:
 
 ---
 
-### Create EKS Cluster
+### Create EKS Cluster and related Infrastructure
 
-Create an EKS cluster with auto mode enabled for simplified management:
-
-```bash
-eksctl create cluster --name ${CLUSTER_NAME} --enable-auto-mode
-```
-
-This command will:
-- Create a new EKS cluster with Kubernetes v1.32
-- Enable EKS auto mode for automatic node provisioning
-- Set up both AMD64 and ARM64 node support
-- Configure the necessary VPC and networking
-- Install essential add-ons like metrics-server
-
-**Expected output:**
-```
-✔ EKS cluster "agents-on-eks" in "us-west-2" region is ready
-```
-
-Verify the cluster is running:
-```bash
-kubectl get pods -A
-```
-
----
-
-### Configure IAM and Bedrock Access
-
-#### Step 1: Create IAM Role for Pod Identity
-
-Create an IAM role that allows EKS pods to access Amazon Bedrock:
+Run the terraform
 
 ```bash
-aws iam create-role \
-  --role-name ${BEDROCK_PODIDENTITY_IAM_ROLE} \
-  --assume-role-policy-document '{
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "pods.eks.amazonaws.com"
-        },
-        "Action": [
-          "sts:AssumeRole",
-          "sts:TagSession"
-        ]
-      }
-    ]
-  }'
-```
-
-#### Step 2: Attach Bedrock Access Policy
-
-Add the necessary permissions for Amazon Bedrock:
-
-```bash
-aws iam put-role-policy \
-  --role-name ${BEDROCK_PODIDENTITY_IAM_ROLE} \
-  --policy-name BedrockAccess \
-  --policy-document '{
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Action": [
-          "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
-        ],
-        "Resource": "*"
-      }
-    ]
-  }'
-```
-
-#### Step 3: Create Pod Identity Association
-
-Link the IAM role to your Kubernetes service account:
-
-```bash
-aws eks create-pod-identity-association \
-  --cluster ${CLUSTER_NAME} \
-  --role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/${BEDROCK_PODIDENTITY_IAM_ROLE} \
-  --namespace ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
-  --service-account ${KUBERNETES_APP_WEATHER_AGENT_SERVICE_ACCOUNT}
+cd ../terraform
+terraform apply
+./prep-env-weather-agent.sh
+./prep-env-weather-web.sh
+cd -
 ```
 
 ---
