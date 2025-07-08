@@ -21,17 +21,20 @@
 ### File Structure (AI Agent Reference)
 ```
 weather/
-├── agent.py                 # Core weather agent logic
-├── agent.md                 # Agent configuration (name, description, system prompt)
-├── cloudbot.md              # Fallback agent configuration (CloudBot)
-├── agent_mcp_server.py      # MCP server (port 8080)
-├── agent_a2a_server.py      # A2A server (port 9000)
-├── agent_fastapi.py         # FastAPI server (port 3000)
-├── main.py                  # Entry points + triple server orchestrator
-├── test_e2e_mcp.py          # MCP protocol test client
-├── test_e2e_a2a.py          # A2A protocol test client
-├── test_e2e_fastapi.py      # FastAPI Python test client
-├── test_e2e_fastapi_curl.sh # Workshop-friendly curl test script
+├── src/                     # Source code directory
+│   ├── __init__.py          # Package initialization
+│   ├── agent.py             # Core weather agent logic + configuration utilities
+│   ├── agent_server_mcp.py  # MCP server (port 8080)
+│   ├── agent_server_a2a.py  # A2A server (port 9000)
+│   ├── agent_server_fastapi.py # FastAPI server (port 3000)
+│   ├── agent_interactive.py # Interactive CLI agent
+│   └── main.py              # Entry points + triple server orchestrator
+├── tests/                   # E2E test suite
+│   ├── __init__.py          # Test package init
+│   ├── test_e2e_mcp.py      # MCP protocol test client
+│   ├── test_e2e_a2a.py      # A2A protocol test client
+│   ├── test_e2e_fastapi.py  # FastAPI Python test client
+│   └── test_e2e_fastapi_curl.sh # Workshop-friendly curl test script
 ├── Dockerfile               # Multi-arch container (agent)
 ├── helm/                    # Kubernetes deployment charts
 ├── mcp-servers/             # MCP tool definitions
@@ -41,9 +44,19 @@ weather/
 └── AmazonQ.md              # This file - AI Agent technical reference
 ```
 
-## 🔧 Critical Technical Decisions (AI Context)
+## 🔧 Entry Points Configuration
 
-### 1. Agent Configuration System
+```python
+# pyproject.toml [project.scripts]
+"mcp-server"       = "src.main:main_mcp_server"    # MCP only
+"a2a-server"       = "src.main:main_a2a_server"    # A2A only
+"fastapi-server"   = "src.main:main_fastapi"       # FastAPI only
+"interactive"      = "src.main:main_interactive"   # CLI mode
+"agent"            = "src.main:servers"            # All three servers (DEFAULT)
+"test-e2e-mcp"     = "tests.test_e2e_mcp:run_main"   # MCP e2e tests
+"test-e2e-a2a"     = "tests.test_e2e_a2a:run_main"   # A2A e2e tests
+"test-e2e-fastapi" = "tests.test_e2e_fastapi:main"   # FastAPI e2e tests
+```
 - **Implementation**: Markdown-based configuration in `agent.md`
 - **Override**: `AGENT_CONFIG_FILE` environment variable support
 - **Parsing**: Regex-based section extraction from markdown
@@ -57,12 +70,12 @@ weather/
 - **Shutdown**: Graceful termination with 2-second timeout, then force kill
 
 ### 3. Transport Protocol Change
-- **Change**: `agent_mcp_server.py` default from `stdio` → `streamable-http`
+- **Change**: `agent_server_mcp.py` default from `stdio` → `streamable-http`
 - **Impact**: Eliminates need for CLI args in container deployment
 - **Compatibility**: Maintains stdio support via `--transport stdio`
 
 ### 4. FastAPI Integration
-- **Implementation**: FastAPI-based API in `agent_fastapi.py`
+- **Implementation**: FastAPI-based API in `agent_server_fastapi.py`
 - **Integration**: Uses existing `weather_assistant()` function from `agent.py`
 - **Endpoints**: `/health`, `/prompt`
 
@@ -71,19 +84,56 @@ weather/
 - **Solution**: `docker buildx --platform linux/amd64,linux/arm64`
 - **Verification**: `docker manifest inspect <image>`
 
-## 🚀 Entry Points Configuration
+## 🔧 Entry Points Configuration
 
 ```python
 # pyproject.toml [project.scripts]
-"mcp-server"     = "main:main_mcp_server"    # MCP only
-"a2a-server"     = "main:main_a2a_server"    # A2A only
-"fastapi-server" = "main:main_fastapi"       # FastAPI only
-"interactive"    = "main:main_interactive"   # CLI mode
-"agent"          = "main:servers"            # All three servers (DEFAULT)
+"mcp-server"       = "src.main:main_mcp_server"    # MCP only
+"a2a-server"       = "src.main:main_a2a_server"    # A2A only
+"fastapi-server"   = "src.main:main_fastapi"       # FastAPI only
+"interactive"      = "src.main:main_interactive"   # CLI mode
+"agent"            = "src.main:servers"            # All three servers (DEFAULT)
+"test-e2e-mcp"     = "tests.test_e2e_mcp:run_main"   # MCP e2e tests
+"test-e2e-a2a"     = "tests.test_e2e_a2a:run_main"   # A2A e2e tests
+"test-e2e-fastapi" = "tests.test_e2e_fastapi:main"   # FastAPI e2e tests
+```
+
+## 📊 Standardized Logging Configuration
+
+All modules in `src/` follow the same logging configuration pattern established in `main.py`:
+
+```python
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG if os.getenv('DEBUG') == '1' else logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+    force=True,
+)
+logger = logging.getLogger(__name__)
+```
+
+**Key Features:**
+- **Environment-based Level**: `DEBUG=1` enables debug logging, otherwise INFO level
+- **Consistent Format**: Timestamp, module name, level, and message
+- **Stdout Output**: All logs go to stdout for container compatibility
+- **Force Override**: Ensures configuration takes precedence over other logging setups
+- **Module-specific Loggers**: Each module gets its own logger with `__name__`
+
+**Usage Examples:**
+```bash
+# Normal logging (INFO level)
+uv run agent
+
+# Debug logging (DEBUG level)
+DEBUG=1 uv run agent
+
+# Container with debug logging
+docker run -e DEBUG=1 weather-agent
 ```
 
 ```python
-# main.py default behavior
+# src/main.py default behavior
 if __name__ == "__main__":
     servers()  # Changed from main_interactive() to servers()
 ```
@@ -172,25 +222,25 @@ def main():
     """Entry point with server checking"""
 ```
 
-### MCP Test Client (`test_e2e_mcp.py`)
+### MCP Test Client (`tests/test_e2e_mcp.py`)
 - **Protocol**: StreamableHTTP with SSE
 - **Tests**: 6 tests (0-5)
 - **Key Features**: Session initialization, tool discovery, tool execution
 - **Connection**: `streamablehttp_client()` with proper tuple unpacking
 
-### A2A Test Client (`test_e2e_a2a.py`)
+### A2A Test Client (`tests/test_e2e_a2a.py`)
 - **Protocol**: HTTP with JSON-RPC
 - **Tests**: 6 tests (1-6)
 - **Key Features**: Agent card discovery, client initialization, message sending
 - **Connection**: `A2ACardResolver` and `A2AClient`
 
-### FastAPI Test Client (`test_e2e_fastapi.py`)
+### FastAPI Test Client (`tests/test_e2e_fastapi.py`)
 - **Protocol**: HTTP with FastAPI
 - **Tests**: 6 tests (1-6)
 - **Key Features**: Async HTTP testing, health checks, weather endpoints, error handling
 - **Connection**: aiohttp with async/await
 
-### FastAPI Test Client (`test_e2e_fastapi_curl.sh`)
+### FastAPI Test Client (`tests/test_e2e_fastapi_curl.sh`)
 - **Protocol**: HTTP with FastAPI
 - **Tests**: 6 tests (1-6)
 - **Key Features**: Health checks, weather endpoints, error handling
@@ -221,10 +271,10 @@ All three test clients provide consistent user experience:
 - **Error Handling**: Graceful failure handling and clear messages
 - **Response Formatting**: Clean preview of responses with truncation
 
-### MCP Test Client (`test_e2e_mcp.py`)
+### MCP Test Client (`tests/test_e2e_mcp.py`)
 ```bash
 # Tests: 6 comprehensive MCP protocol tests (0-5)
-uv run test_e2e_mcp.py
+uv run test-e2e-mcp
 ```
 **Test Coverage:**
 - HTTP connectivity and SSE validation
@@ -234,10 +284,10 @@ uv run test_e2e_mcp.py
 - Weather alert tool execution
 - Complex multi-city weather comparisons
 
-### A2A Test Client (`test_e2e_a2a.py`)
+### A2A Test Client (`tests/test_e2e_a2a.py`)
 ```bash
 # Tests: 6 comprehensive A2A protocol tests (1-6)
-uv run test_e2e_a2a.py
+uv run test-e2e-a2a
 ```
 **Test Coverage:**
 - Agent card discovery and capabilities
@@ -247,11 +297,11 @@ uv run test_e2e_a2a.py
 - Invalid message format handling
 - Full response display with markdown rendering
 
-### FastAPI Test Client (`test_e2e_fastapi.py`)
+### FastAPI Test Client (`tests/test_e2e_fastapi.py`)
 ```bash
 # Tests: 6 comprehensive FastAPI tests (1-6)
 # Requires: DISABLE_AUTH=1 uv run fastapi-server
-uv run test_e2e_fastapi.py
+uv run test-e2e-fastapi
 ```
 **Test Coverage:**
 - Health check endpoint validation
@@ -261,10 +311,10 @@ uv run test_e2e_fastapi.py
 - Error handling (empty text, 404 responses)
 - Async/await pattern with aiohttp
 
-### FastAPI Test Client (`test_e2e_fastapi_curl.sh`)
+### FastAPI Test Client (`tests/test_e2e_fastapi_curl.sh`)
 ```bash
 # Tests: 6 comprehensive FastAPI tests (1-6)
-./test_e2e_fastapi_curl.sh
+./tests/test_e2e_fastapi_curl.sh
 ```
 **Test Coverage:**
 - Health check endpoint validation
@@ -282,10 +332,10 @@ DISABLE_AUTH=1 uv run fastapi-server
 uv run agent
 
 # Run all tests (in separate terminals)
-uv run test_e2e_mcp.py        # Port 8080
-uv run test_e2e_a2a.py        # Port 9000
-uv run test_e2e_fastapi.py    # Port 3000 (requires DISABLE_AUTH=1 server)
-./test_e2e_fastapi_curl.sh    # Port 3000 (requires DISABLE_AUTH=1 server)
+uv run test-e2e-mcp        # Port 8080
+uv run test-e2e-a2a        # Port 9000
+uv run test-e2e-fastapi    # Port 3000 (requires DISABLE_AUTH=1 server)
+./tests/test_e2e_fastapi_curl.sh # Port 3000 (requires DISABLE_AUTH=1 server)
 ```
 
 ### Development Testing
@@ -303,10 +353,10 @@ uv run fastapi-server                # For production (with auth)
 DISABLE_AUTH=1 uv run fastapi-server # For testing (without auth)
 
 # Protocol verification
-uv run test_e2e_mcp.py               # MCP: http://localhost:8080/mcp
-uv run test_e2e_a2a.py               # A2A: http://localhost:9000
-uv run test_e2e_fastapi.py           # FastAPI: http://localhost:3000 (requires DISABLE_AUTH=1)
-./test_e2e_fastapi_curl.sh           # FastAPI: http://localhost:3000 (requires DISABLE_AUTH=1)
+uv run test-e2e-mcp               # MCP: http://localhost:8080/mcp
+uv run test-e2e-a2a               # A2A: http://localhost:9000
+uv run test-e2e-fastapi           # FastAPI: http://localhost:3000 (requires DISABLE_AUTH=1)
+./tests/test_e2e_fastapi_curl.sh        # FastAPI: http://localhost:3000 (requires DISABLE_AUTH=1)
 
 ```
 
@@ -324,10 +374,10 @@ kubectl get events --sort-by=.metadata.creationTimestamp
 kubectl port-forward service/weather-agent 8080:8080 9000:9000 3000:3000
 
 # Test all protocols
-uv run test_e2e_mcp.py        # MCP Protocol validation
-uv run test_e2e_a2a.py        # A2A Protocol validation
-uv run test_e2e_fastapi.py    # FastAPI validation
-./test_e2e_fastapi_curl.sh    # FastAPI validation
+uv run test-e2e-mcp        # MCP Protocol validation
+uv run test-e2e-a2a        # A2A Protocol validation
+uv run test-e2e-fastapi    # FastAPI validation
+./tests/test_e2e_fastapi_curl.sh # FastAPI validation
 ```
 
 ## 🎯 AI Agent Workflow Guidelines
@@ -355,8 +405,8 @@ uv run test_e2e_fastapi.py    # FastAPI validation
 - **ECR Repository**: `agents-on-eks/weather-agent`
 - **Bedrock Model**: `us.anthropic.claude-3-7-sonnet-20250219-v1:0`
 - **MCP Inspector**: `npx @modelcontextprotocol/inspector`
-- **A2A Test Client**: `uv run test_e2e_a2a.py`
-- **FastAPI Test Client**: `./test_e2e_fastapi_curl.sh`
+- **A2A Test Client**: `uv run test-e2e-a2a`
+- **FastAPI Test Client**: `./tests/test_e2e_fastapi_curl.sh`
 
 ---
 

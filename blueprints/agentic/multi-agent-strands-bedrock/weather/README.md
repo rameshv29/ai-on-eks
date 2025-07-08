@@ -294,7 +294,7 @@ cd -
 
 #### Step 1: Create ECR Repositories
 
-Create a private ECR repository for the weather mcp image:
+Create a private ECR repository for the weather mcp server image:
 
 ```bash
 aws ecr create-repository --repository-name ${ECR_REPO_MCP_NAME}
@@ -305,6 +305,13 @@ Create a private ECR repository for the weather agent image:
 ```bash
 aws ecr create-repository --repository-name ${ECR_REPO_NAME}
 ```
+
+Create a private ECR repository for the weather ui image:
+
+```bash
+aws ecr create-repository --repository-name ${ECR_REPO_UI_NAME}
+```
+
 
 #### Step 2: Authenticate Docker with ECR
 
@@ -332,13 +339,21 @@ docker buildx use multiarch
 
 Build the image for both AMD64 and ARM64 architectures:
 
-MCP Server:
+Build and push MCP Server:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   -t ${ECR_REPO_WEATHER_MCP_URI}:latest \
   --push mcp-servers/weather-mcp-server
 ```
+
+If using linux you can use `docker build` for single CPU architecture matching linux host:
+```bash
+docker build -t ${ECR_REPO_WEATHER_MCP_URI}:latest mcp-servers/weather-mcp-server
+docker push ${ECR_REPO_WEATHER_MCP_URI}:latest
+```
+
+Now Configure the `mcp.json` for the Weather Agent to leverage the Weather MCP Server that will be running in Kubernetes
 
 ```bash
 cat > mcp.json << 'EOF'
@@ -357,12 +372,17 @@ EOF
 
 
 
-Agent:
+Build and push Agent:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   -t ${ECR_REPO_WEATHER_AGENT_URI}:latest \
   --push .
+```
+If using linux you can use `docker build` for single CPU architecture matching linux host:
+```bash
+docker build -t ${ECR_REPO_WEATHER_AGENT_URI}:latest .
+docker push ${ECR_REPO_WEATHER_AGENT_URI}:latest
 ```
 
 This command will:
@@ -480,19 +500,17 @@ The weather agent supports three protocols simultaneously. You can access it thr
 
 #### Deploy the Weather Web Chat UI
 
-Create a private ECR repository for the weather agent image:
-
-```bash
-aws ecr create-repository --repository-name ${ECR_REPO_UI_NAME}
-```
-
 Build the image for both AMD64 and ARM64 architectures:
-
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   -t ${ECR_REPO_WEATHER_AGENT_UI_URI}:latest \
   --push web
+```
+If using linux you can use `docker build` for single CPU architecture matching linux host:
+```bash
+docker build -t ${ECR_REPO_WEATHER_AGENT_UI_URI}:latest web
+docker push ${ECR_REPO_WEATHER_AGENT_UI_URI}:latest
 ```
 
 Load the extra environment variables to be used in Helm:
@@ -521,6 +539,9 @@ helm upgrade ${KUBERNETES_APP_WEATHER_AGENT_UI_NAME} web/helm --install \
 ```bash
 kubectl --namespace weather-agent port-forward svc/weather-ui 8000:fastapi
 ```
+Open http://localhost:8000/chat
+
+Login with `Alice` and password `Passw0rd@`
 
 #### Run Port forward to expose the agent locally
 ```bash
@@ -535,10 +556,10 @@ kubectl -n ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} \
 **Test All Protocols:**
 ```bash
 # In separate terminals, run each test client:
-uv run test_e2e_mcp.py        # Tests MCP Protocol (6 tests)
-uv run test_e2e_a2a.py        # Tests A2A Protocol (6 tests)
-uv run test_e2e_fastapi.py    # Tests FastAPI (6 tests) - requires DISABLE_AUTH=1 uv run fastapi-server
-./test_e2e_fastapi_curl.sh    # Tests FastAPI (6 tests, colorized) - requires DISABLE_AUTH=1 uv run fastapi-server
+uv run test-e2e-mcp        # Tests MCP Protocol (6 tests)
+uv run test-e2e-a2a        # Tests A2A Protocol (6 tests)
+uv run test-e2e-fastapi    # Tests FastAPI (6 tests) - requires DISABLE_AUTH=1 uv run fastapi-server
+./tests/test_e2e_fastapi_curl.sh # Tests FastAPI (6 tests, colorized) - requires DISABLE_AUTH=1 uv run fastapi-server
 ```
 
 #### Test Client Features
@@ -566,8 +587,8 @@ Each test client provides:
 - Response validation and formatting
 
 **FastAPI (6 tests each):**
-- **Python Client** (`test_e2e_fastapi.py`): Async HTTP testing with aiohttp
-- **Curl Client** (`test_e2e_fastapi_curl.sh`): Workshop-friendly colorized output
+- **Python Client** (`tests/test_e2e_fastapi.py`): Async HTTP testing with aiohttp
+- **Curl Client** (`tests/test_e2e_fastapi_curl.sh`): Workshop-friendly colorized output
 - Health check endpoint validation
 - FastAPI endpoint functionality with weather queries
 - Response validation and formatting
@@ -641,7 +662,7 @@ uv run mcp-server --transport streamable-http
 
 #### Run the mcp client
 ```bash
-uv run test_e2e_mcp.py
+uv run test-e2e-mcp
 ```
 
 Connect your mcp client such as `npx @modelcontextprotocol/inspector` then in the UI use streamable-http with `http://localhost:8080/mcp`
@@ -653,7 +674,7 @@ uv run a2a-server
 
 #### Run the a2a client
 ```bash
-uv run test_e2e_a2a.py
+uv run test-e2e-a2a
 ```
 
 #### Run as FastAPI server
@@ -668,7 +689,7 @@ DISABLE_AUTH=1 uv run fastapi-server
 
 #### Run the FastAPI client
 ```bash
-./test_e2e_fastapi_curl.sh
+./tests/test_e2e_fastapi_curl.sh
 ```
 
 #### Running in a Container
@@ -713,9 +734,9 @@ agent agent
 
 Use test clients to verify all three protocols:
 ```bash
-uv run test_e2e_mcp.py        # Tests MCP Protocol
-uv run test_e2e_a2a.py        # Tests A2A Protocol
-uv run test_e2e_fastapi_curl.sh  # Tests FastAPI (requires DISABLE_AUTH=1 in container)
+uv run test-e2e-mcp        # Tests MCP Protocol
+uv run test-e2e-a2a        # Tests A2A Protocol
+./tests/test_e2e_fastapi_curl.sh  # Tests FastAPI (requires DISABLE_AUTH=1 in container)
 ```
 
 Now you can connect with the MCP client to `http://localhost:8080/mcp`.

@@ -71,6 +71,11 @@ COPY --from=uv --chown=app:app /root/.local /root/.local
 COPY --from=uv --chown=app:app /app/.venv /app/.venv
 COPY --from=uv --chown=app:app /app/mcp-servers /app/mcp-servers
 
+# Copy configuration files needed at runtime
+COPY --from=uv --chown=app:app /app/agent.md /app/agent.md
+COPY --from=uv --chown=app:app /app/mcp.json /app/mcp.json
+COPY --from=uv --chown=app:app /app/cloudbot.md /app/cloudbot.md
+
 # Get healthcheck script
 #COPY ./docker-healthcheck.sh /usr/local/bin/docker-healthcheck.sh
 

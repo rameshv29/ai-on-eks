@@ -5,30 +5,91 @@ AI Agent FastAPI Server
 Provides a FastAPI REST API interface for the AI agent, allowing HTTP clients
 to interact with the agent functionality with simple stateless endpoints.
 """
-
-import os
 import logging
+import os
+import sys
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG if os.getenv('DEBUG') == '1' else logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+    force=True,
+)
+logger = logging.getLogger(__name__)
+
+
+import json
 from typing import Dict, Any, Optional
 from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 import uvicorn
 import jwt
-import agent_state_manager
-from agent import get_agent
+from strands import Agent
+from .agent import get_agent
+
 
 COGNITO_JWKS_URL = os.environ.get('COGNITO_JWKS_URL')
 # Disable authentication for testing if COGNITO_JWKS_URL contains localhost or is a test URL
 TESTING_MODE = not COGNITO_JWKS_URL or 'localhost' in COGNITO_JWKS_URL or os.environ.get('DISABLE_AUTH') == '1'
 jwks_client = jwt.PyJWKClient(COGNITO_JWKS_URL) if COGNITO_JWKS_URL and not TESTING_MODE else None
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 # Debug logging
 logger.info(f"COGNITO_JWKS_URL: {COGNITO_JWKS_URL}")
 logger.info(f"Testing mode: {TESTING_MODE}")
 logger.info(f"Authentication enabled: {not TESTING_MODE}")
+
+# DynamoDB setup for agent state management (with in-memory fallback for testing)
+USE_DYNAMODB = os.environ.get('DYNAMODB_AGENT_STATE_TABLE_NAME') is not None
+
+if USE_DYNAMODB:
+    import boto3
+    from boto3.dynamodb.conditions import Key
+    ddb = boto3.resource('dynamodb')  # type: ignore
+    agent_state_table = ddb.Table(os.environ['DYNAMODB_AGENT_STATE_TABLE_NAME'])  # type: ignore
+    logger.info("Using DynamoDB for agent state management")
+else:
+    # In-memory storage for testing purposes
+    agent_state_memory: Dict[str, str] = {}
+    logger.info("Using in-memory storage for agent state management (testing mode)")
+
+
+def save_agent_state(user_id: str, agent: Agent):
+    """Save agent state to DynamoDB or in-memory storage"""
+    logger.info(f"saving agent state for user.id={user_id}")
+    messages = agent.messages
+
+    if USE_DYNAMODB:
+        agent_state_table.put_item(Item={
+            'user_id': user_id,
+            'state': json.dumps(messages)
+        })
+    else:
+        # Save to in-memory storage
+        agent_state_memory[user_id] = json.dumps(messages)
+
+
+def restore_agent_state(user_id: str):
+    """Restore agent state from DynamoDB or in-memory storage"""
+    logger.info(f"restoring agent state for user.id={user_id}")
+
+    if USE_DYNAMODB:
+        ddb_response = agent_state_table.get_item(Key={'user_id': user_id})
+        item = ddb_response.get('Item')
+        if item:
+            messages = json.loads(item['state'])
+        else:
+            messages = []
+    else:
+        # Restore from in-memory storage
+        state_json = agent_state_memory.get(user_id)
+        if state_json:
+            messages = json.loads(state_json)
+        else:
+            messages = []
+
+    print(f"messages={messages}")
+    return messages
+
 
 # Pydantic models for request/response
 class PromptRequest(BaseModel):
@@ -119,7 +180,7 @@ class AgentFastAPI:
                 logger.info(f"User username: {username}")
                 logger.info(f"User id: {user_id}")
                 logger.info(f"User prompt: {prompt}")
-                messages = agent_state_manager.restore(user_id)
+                messages = restore_agent_state(user_id)
 
                 # Get agent instance (lazy loading)
                 agent = get_agent(messages)
@@ -127,7 +188,7 @@ class AgentFastAPI:
                 # Process the text with the agent
                 response = str(agent(prompt))
 
-                agent_state_manager.save(user_id,agent)
+                save_agent_state(user_id, agent)
 
                 return PromptResponse(text=response)
 

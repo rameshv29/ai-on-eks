@@ -2,18 +2,7 @@
 
 import logging
 import os
-import signal
 import sys
-import subprocess
-import time
-import dotenv
-
-dotenv.load_dotenv()
-
-from agent_a2a_server  import a2a_agent
-from agent_mcp_server  import mcp_agent
-from agent_fastapi     import fastapi_agent
-from agent_interactive import interactive_agent
 
 # Configure logging
 logging.basicConfig(
@@ -22,8 +11,19 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
     force=True,
 )
-
 logger = logging.getLogger(__name__)
+
+import signal
+import subprocess
+import time
+import dotenv
+
+dotenv.load_dotenv()
+
+from .agent_server_a2a      import a2a_agent
+from .agent_server_mcp      import mcp_agent
+from .agent_server_fastapi  import fastapi_agent
+from .agent_interactive     import interactive_agent
 
 
 def main_mcp_server():
