@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Any
 from mcp import StdioServerParameters, stdio_client
 from mcp.client.streamable_http import streamablehttp_client
 from strands import Agent
+from strands.agent.conversation_manager import ConversationManager
 from strands.models import BedrockModel
 from strands.tools.mcp import MCPClient
 from strands.types.content import Messages
@@ -25,7 +26,7 @@ _mcp_tools_cache = None
 
 
 
-def get_agent(messages: Optional[Messages]=None) -> Agent:
+def get_agent(messages: Optional[Messages]=None,conversation_manager: Optional[ConversationManager] = None) -> Agent:
     """
     Create and return an Agent instance with dynamically loaded MCP tools.
 
@@ -46,7 +47,8 @@ def get_agent(messages: Optional[Messages]=None) -> Agent:
             model=bedrock_model,
             system_prompt=system_prompt,
             tools=all_tools,
-            messages=messages
+            messages=messages,
+            conversation_manager=conversation_manager
         )
 
         return agent

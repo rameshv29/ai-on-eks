@@ -388,14 +388,21 @@ You should see entries for both `linux/amd64` and `linux/arm64`.
 
 ### Deploy to Kubernetes
 
-Deploy the weather agent using Helm:
+Load the extra environment variables to be used in Helm:
+```bash
+source .env
+```
 
+Deploy the weather agent using Helm:
 ```bash
 helm upgrade ${KUBERNETES_APP_WEATHER_AGENT_NAME} helm --install \
   --namespace ${KUBERNETES_APP_WEATHER_AGENT_NAMESPACE} --create-namespace \
   --set serviceAccount.name=${KUBERNETES_APP_WEATHER_AGENT_SERVICE_ACCOUNT} \
   --set image.repository=${ECR_REPO_WEATHER_AGENT_URI} \
   --set image.pullPolicy=Always \
+  --set env.BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID} \
+  --set env.DYNAMODB_AGENT_STATE_TABLE_NAME=${DYNAMODB_AGENT_STATE_TABLE_NAME} \
+  --set env.COGNITO_JWKS_URL=${COGNITO_JWKS_URL} \
   --set image.tag=latest
 ```
 
@@ -670,6 +677,7 @@ Run the agent as multi-server mcp, a2a, and FastAPI
 ```bash
 docker run \
 -v $HOME/.aws:/app/.aws \
+-v $PWD/.env:/app/.env \
 -p 8080:8080 \
 -p 9000:9000 \
 -p 3000:3000 \
@@ -677,7 +685,7 @@ docker run \
 -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
 -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
 -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
--e DEBUG=1 \
+-e DISABLE_AUTH=1 \
 agent agent
 ```
 

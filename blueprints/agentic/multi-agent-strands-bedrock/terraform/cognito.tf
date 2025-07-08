@@ -1,13 +1,13 @@
 data "aws_region" "current" {}
 
 locals {
-  redirect_uri = length(var.additional_redirect_uri) > 0 ? concat(["http://localhost:8000/callback"], var.additional_redirect_uri) : ["http://localhost:8000/callback"]
-  logout_uri   = length(var.additional_logout_uri) > 0 ? concat(["http://localhost:8000/chat"], var.additional_logout_uri) : ["http://localhost:8000/chat"]
+  redirect_uri = length(var.cognito_additional_redirect_uri) > 0 ? concat(["http://localhost:8000/callback"], var.cognito_additional_redirect_uri) : ["http://localhost:8000/callback"]
+  logout_uri   = length(var.cognito_additional_logout_uri) > 0 ? concat(["http://localhost:8000/chat"], var.cognito_additional_logout_uri) : ["http://localhost:8000/chat"]
 }
 
 resource "random_pet" "cognito" {
   length = 2
-  prefix = var.prefix_user_pool
+  prefix = var.cognito_prefix_user_pool
 }
 
 resource "aws_cognito_user_pool" "user_pool" {

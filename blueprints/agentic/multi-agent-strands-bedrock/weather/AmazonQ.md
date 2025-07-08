@@ -49,9 +49,10 @@ weather/
 - **Requirement**: MD configuration file is **required** - system will raise error if no config found
 
 ### 2. Triple Server Architecture
-- **Implementation**: `servers()` using ThreadPoolExecutor with 3 workers
-- **Rationale**: Reuses existing server code without duplication
-- **Entry Point**: `agent` (default Docker CMD)
+- **Implementation**: `servers()` using subprocess-based concurrency with proper signal handling
+- **Rationale**: Eliminates shutdown issues by running each server as separate subprocess
+- **Entry Point**: `agent` (default Docker CMD and main.py behavior)
+- **Shutdown**: Graceful termination with 2-second timeout, then force kill
 
 ### 3. Transport Protocol Change
 - **Change**: `agent_mcp_server.py` default from `stdio` → `streamable-http`
@@ -75,13 +76,14 @@ weather/
 "mcp-server"     = "main:main_mcp_server"    # MCP only
 "a2a-server"     = "main:main_a2a_server"    # A2A only
 "fastapi-server" = "main:main_fastapi"       # FastAPI only
-"interactive"    = "main:main_interactive"    # CLI mode
-"agent"          = "main:servers"    # All three servers (DEFAULT)
+"interactive"    = "main:main_interactive"   # CLI mode
+"agent"          = "main:servers"            # All three servers (DEFAULT)
 ```
 
-```dockerfile
-# Dockerfile
-CMD ["agent"]
+```python
+# main.py default behavior
+if __name__ == "__main__":
+    servers()  # Changed from main_interactive() to servers()
 ```
 
 ## 🐳 Container Environment
@@ -118,6 +120,12 @@ docker run -p 8080:8080 -p 9000:9000 -p 3000:3000 -e AWS_REGION=us-west-2 weathe
 - **Root Cause**: Wrong transport or port configuration
 - **Fix**: Ensure streamable-http transport and correct ports (8080/9000/3000)
 - **Debug**: Check `kubectl logs deployment/weather-agent`
+
+### Issue: Shutdown Problems
+- **Symptom**: `uv run agent` doesn't respond to Ctrl+C properly
+- **Root Cause**: Signal interception by uv process wrapper
+- **Fix**: Use direct Python execution: `python3 main.py`
+- **Alternative**: Use `uv run agent` but expect to need force kill
 
 ### Issue: Single Protocol Access
 - **Symptom**: Only MCP or A2A accessible, not both
@@ -280,7 +288,10 @@ uv run test_e2e_fastapi.py    # Port 3000 (requires DISABLE_AUTH=1 server)
 
 ### Development Testing
 ```bash
-# Test triple server locally
+# Test triple server locally (recommended - best shutdown behavior)
+python3 main.py
+
+# Alternative (may have shutdown issues with uv signal handling)
 uv run agent
 
 # Test individual protocols

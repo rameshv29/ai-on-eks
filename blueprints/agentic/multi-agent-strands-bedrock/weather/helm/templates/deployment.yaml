@@ -42,26 +42,26 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: MCP_PORT
-              value: "{{ .Values.agent.mcp.port }}"
+              value: "{{ .Values.mcp.port }}"
             - name: A2A_PORT
-              value: "{{ .Values.agent.a2a.port }}"
+              value: "{{ .Values.a2a.port }}"
             - name: FASTAPI_PORT
-              value: "{{ .Values.agent.fastapi.port }}"
-            {{- if .Values.agent.env }}
-            {{- range .Values.agent.env }}
-            - name: {{ .name }}
-              value: "{{ .value }}"
+              value: "{{ .Values.fastapi.port }}"
+            {{- if .Values.env }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
             {{- end }}
             {{- end }}
           ports:
             - name: mcp
-              containerPort: {{ .Values.agent.mcp.port }}
+              containerPort: {{ .Values.mcp.port }}
               protocol: TCP
             - name: a2a
-              containerPort: {{ .Values.agent.a2a.port }}
+              containerPort: {{ .Values.a2a.port }}
               protocol: TCP
             - name: fastapi
-              containerPort: {{ .Values.agent.fastapi.port }}
+              containerPort: {{ .Values.fastapi.port }}
               protocol: TCP
           {{- with .Values.livenessProbe }}
           livenessProbe:

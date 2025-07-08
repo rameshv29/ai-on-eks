@@ -15,22 +15,23 @@ image:
   tag: "latest"
 
 # Agent Config
-agent:
-  env:
-  - name: BEDROCK_MODEL_ID
-    value: us.anthropic.claude-3-7-sonnet-20250219-v1:0
-  mcp:
-    port: 8080
-    ingress:
-      enabled: false
-  a2a:
-    port: 9000
-    ingress:
-      enabled: false
-  fastapi:
-    port: 3000
-    ingress:
-      enabled: false
+
+env:
+  BEDROCK_MODEL_ID: "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+  DYNAMODB_AGENT_STATE_TABLE_NAME: "weather-agent-to-be-replaced"
+  COGNITO_JWKS_URL: "https://idp-to-be-replaced"
+mcp:
+  port: 8080
+  ingress:
+    enabled: false
+a2a:
+  port: 9000
+  ingress:
+    enabled: false
+fastapi:
+  port: 3000
+  ingress:
+    enabled: false
 
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

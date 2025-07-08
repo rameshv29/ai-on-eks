@@ -11,13 +11,13 @@ spec:
     - name: mcp
       image: busybox
       command: ['wget']
-      args: ['{{ include "agent.fullname" . }}:{{ .Values.agent.mcp.port }}']
+      args: ['{{ include "agent.fullname" . }}:{{ .Values.mcp.port }}']
     - name: a2a
       image: busybox
       command: ['wget']
-      args: ['{{ include "agent.fullname" . }}:{{ .Values.agent.a2a.port }}']
+      args: ['{{ include "agent.fullname" . }}:{{ .Values.a2a.port }}']
     - name: fastapi
       image: busybox
       command: ['wget']
-      args: ['{{ include "agent.fullname" . }}:{{ .Values.agent.fastapi.port }}/health']
+      args: ['{{ include "agent.fullname" . }}:{{ .Values.fastapi.port }}/health']
   restartPolicy: Never

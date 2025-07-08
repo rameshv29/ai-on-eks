@@ -4,9 +4,9 @@ import logging
 import os
 import signal
 import sys
-import threading
+import subprocess
+import time
 import dotenv
-from concurrent.futures import ThreadPoolExecutor
 
 dotenv.load_dotenv()
 
@@ -51,43 +51,85 @@ def main_interactive():
 
 
 def servers():
-    """Start MCP, A2A, and FastAPI servers concurrently."""
+    """Start MCP, A2A, and FastAPI servers concurrently using subprocesses."""
     logger.info("Starting Agent Triple Server...")
-    logger.info(f"MCP Server will run on port {os.getenv('MCP_PORT', '8080')} with streamable-http transport")
+    logger.info(f"MCP Server will run on port {os.getenv('MCP_PORT', '8080')}")
     logger.info(f"A2A Server will run on port {os.getenv('A2A_PORT', '9000')}")
     logger.info(f"FastAPI Server will run on port {os.getenv('FASTAPI_PORT', '3000')}")
 
-    # Event to coordinate shutdown
-    shutdown_event = threading.Event()
+    processes = []
 
-    def signal_handler(signum, frame):
-        logger.info(f"Received signal {signum}, initiating shutdown...")
-        shutdown_event.set()
+    def cleanup_and_exit(signum=None, frame=None):
+        if signum:
+            logger.info(f"Received signal {signum}, shutting down...")
+        else:
+            logger.info("Shutting down...")
+
+        # Terminate all processes
+        for name, process in processes:
+            if process.poll() is None:  # Still running
+                logger.info(f"Terminating {name} (PID: {process.pid})")
+                try:
+                    process.terminate()
+                    process.wait(timeout=2)
+                    logger.info(f"{name} terminated gracefully")
+                except subprocess.TimeoutExpired:
+                    logger.info(f"Force killing {name}")
+                    process.kill()
+                    process.wait()
+                except Exception as e:
+                    logger.error(f"Error stopping {name}: {e}")
+
+        logger.info("All servers stopped")
+        sys.exit(0)
 
     # Set up signal handlers
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, cleanup_and_exit)
+    signal.signal(signal.SIGTERM, cleanup_and_exit)
 
-    # Use ThreadPoolExecutor to run all three servers
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        try:
-            # Submit all server functions to the thread pool
-            mcp_future = executor.submit(main_mcp_server)
-            a2a_future = executor.submit(main_a2a_server)
-            fastapi_future = executor.submit(main_fastapi)
+    try:
+        # Start MCP server
+        logger.info("Starting MCP Server...")
+        mcp_process = subprocess.Popen([
+            "uv", "run", "mcp-server", "--transport", "streamable-http"
+        ])
+        processes.append(("MCP Server", mcp_process))
 
-            logger.info("All three servers started successfully!")
+        # Start A2A server
+        logger.info("Starting A2A Server...")
+        a2a_process = subprocess.Popen([
+            "uv", "run", "a2a-server"
+        ])
+        processes.append(("A2A Server", a2a_process))
 
-            # Wait for shutdown signal
-            shutdown_event.wait()
+        # Start FastAPI server
+        logger.info("Starting FastAPI Server...")
+        fastapi_process = subprocess.Popen([
+            "uv", "run", "fastapi-server"
+        ])
+        processes.append(("FastAPI Server", fastapi_process))
 
-        except KeyboardInterrupt:
-            logger.info("Received keyboard interrupt, shutting down...")
-        except Exception as e:
-            logger.error(f"Error running triple server: {e}")
-        finally:
-            logger.info("Shutting down triple server...")
+        logger.info("All servers started successfully!")
+        logger.info("Press Ctrl+C to stop all servers")
+
+        # Monitor processes
+        while True:
+            # Check if any process has died
+            for name, process in processes:
+                if process.poll() is not None:
+                    logger.error(f"{name} exited with code {process.returncode}")
+                    cleanup_and_exit()
+                    return
+
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        logger.info("Received keyboard interrupt")
+        cleanup_and_exit()
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        cleanup_and_exit()
 
 
 if __name__ == "__main__":
-    main_interactive()
+    servers()

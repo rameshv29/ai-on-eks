@@ -28,8 +28,8 @@ module "weather_agent_pod_identity" {
   associations = {
     weather-agent = {
       cluster_name    = module.eks.cluster_name
-      namespace       = "weather-agent"
-      service_account = "weather-agent"
+      namespace       = var.weather_namespace
+      service_account = var.weather_service_account
     }
   }
 
