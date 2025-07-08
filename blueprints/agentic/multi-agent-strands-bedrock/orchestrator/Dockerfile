@@ -20,7 +20,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
 
 # Expose ports
-EXPOSE 8080 9000 3000
+EXPOSE 3000
 
 # Run the FastAPI server
 CMD ["uvicorn", "agent_fastapi:app", "--host", "0.0.0.0", "--port", "3000"]
