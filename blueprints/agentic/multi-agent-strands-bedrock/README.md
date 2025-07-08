@@ -1,172 +1,86 @@
-# Multi-Agent System with Bedrock
+# Multi-Agent System with Strands and Bedrock
 
-A comprehensive multi-agent system built on AWS Bedrock that combines specialized agents for weather information and travel planning, orchestrated through a central coordinator.
+This project demonstrates a multi-agent system built with [Strands](https://github.com/trychroma/strands) and AWS Bedrock. The system consists of three main components:
 
-## System Architecture
+1. **Orchestrator Agent**: Coordinates interactions between agents and handles user requests
+2. **Weather Agent**: Provides weather information for specific locations and dates
+3. **Citymapper Agent**: Provides travel planning information and recommendations
 
-This system demonstrates the power of agent-to-agent (A2A) communication, allowing specialized agents to work together to solve complex user queries:
+## Architecture
 
-```
-┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│                 │      │                 │      │                 │
-│  Weather Agent  │◄────►│  Orchestrator   │◄────►│ Citymapper Agent│
-│                 │      │                 │      │                 │
-└─────────────────┘      └─────────────────┘      └─────────────────┘
-        │                        ▲                        │
-        │                        │                        │
-        ▼                        │                        ▼
-┌─────────────────┐              │              ┌─────────────────┐
-│  Weather Data   │              │              │ Activities &     │
-│  MCP Server     │              │              │ Mapper Servers   │
-└─────────────────┘              │              └─────────────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │                 │
-                        │     User        │
-                        │                 │
-                        └─────────────────┘
-```
+The multi-agent system uses the following technologies:
 
-### Components
+- **AWS Bedrock**: For large language model inference
+- **Strands**: For agent framework and tools
+- **A2A Protocol**: For agent-to-agent communication
+- **DynamoDB**: For state management
+- **FastAPI**: For REST API endpoints
+- **Docker**: For containerization and local development
 
-1. **Orchestrator Agent**: Central coordinator that routes user queries to specialized agents
-2. **Weather Agent**: Provides weather forecasts and conditions for locations worldwide
-3. **Citymapper Agent**: Creates travel itineraries with activities, dining, and route optimization
-4. **MCP Servers**: Specialized tool servers that provide domain-specific capabilities
+## Prerequisites
 
-## Quick Start
+- Docker and Docker Compose
+- AWS account with Bedrock access (for production deployment)
+- Python 3.11+
 
-Deploy the entire multi-agent system with a single command:
+## Local Development
 
-```bash
-cd blueprints/agentic/multi-agent-strands-bedrock
-./deploy-multi-agent.sh
-```
+### Setup
 
-This will start:
-- All agent services (Orchestrator, Weather, Citymapper)
-- MCP servers for specialized tools
-- Langfuse observability platform
-
-### Access the System
-
-- **Orchestrator FastAPI**: http://localhost:3000
-- **Weather Agent FastAPI**: http://localhost:3001
-- **Citymapper Agent FastAPI**: http://localhost:3002
-- **Langfuse UI**: http://localhost:8000
-
-## Environment Setup
-
-Create a `.env` file in the `multi-agent-strands-bedrock` directory:
-
-```
-# AWS Configuration
-AWS_REGION=us-west-2
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-
-# Bedrock Model
-BEDROCK_MODEL_ID=us.anthropic.claude-3-7-sonnet-20250219-v1:0
-
-# Port Configuration
-ORCHESTRATOR_PORT=3000
-WEATHER_FASTAPI_PORT=3001
-CITYMAPPER_FASTAPI_PORT=3002
-WEATHER_A2A_PORT=9000
-CITYMAPPER_A2A_PORT=9001
-WEATHER_MCP_PORT=8080
-CITYMAPPER_MCP_PORT=8081
-
-# Optional Configuration
-DYNAMODB_AGENT_STATE_TABLE_NAME=agent-state-table
-S3_BUCKET_NAME=travel-plans-bucket
-DEBUG=1
-```
-
-## Testing the System
-
-### End-to-End Test
-
-Test the complete multi-agent system:
-
-```bash
-cd blueprints/agentic/multi-agent-strands-bedrock
-python test_multi_agent.py
-```
-
-### Example Queries
-
-Try these example queries with the orchestrator:
-
-1. "What's the weather like in San Francisco today?"
-2. "Plan a 3-day trip to New York City with focus on museums and parks"
-3. "I'm planning a trip to San Francisco next week. What's the weather forecast and what activities would you recommend?"
-
-## Individual Agent Documentation
-
-For detailed information about each agent:
-
-- [Orchestrator Agent](./orchestrator/README.md)
-- [Weather Agent](./weather/README.md)
-- [Citymapper Agent](./citymapper/README.md)
-
-## Deployment Options
-
-### Docker Compose (Development)
-
-For local development and testing:
+1. Clone the repository
+2. Navigate to the project directory
+3. Create a `.env` file based on `.env.example`
+4. Start the services:
 
 ```bash
 docker-compose up -d
 ```
 
-### EKS Deployment (Production)
+### Testing
 
-For production deployment on Amazon EKS:
+You can test the orchestrator API with:
 
 ```bash
-cd blueprints/agentic/multi-agent-strands-bedrock
-./deploy-eks.sh
+curl -X POST http://localhost:3000/prompt \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello, can you help me plan a trip to Seattle?"}'
 ```
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed production deployment instructions.
+## Production Deployment
 
-## Observability
+For production deployment, follow these steps:
 
-This system includes Langfuse for comprehensive observability:
+1. Configure AWS credentials with access to Bedrock
+2. Set the appropriate environment variables in the `.env` file
+3. Deploy the system using the provided deployment scripts
 
-- Trace all agent interactions
-- Monitor token usage and costs
-- Evaluate response quality
-- Track user feedback
+## Components
 
-Access the Langfuse UI at http://localhost:8000 after deployment.
+### Orchestrator Agent
 
-## Architecture Details
+The orchestrator agent is responsible for:
+- Handling user requests
+- Coordinating interactions between agents
+- Managing conversation state
 
-### Agent-to-Agent (A2A) Communication
+### Weather Agent
 
-Agents communicate using the A2A protocol, which enables:
-- Structured message passing between agents
-- Tool delegation for specialized tasks
-- Context preservation across agent boundaries
-- Stateful conversations with multiple agents
+The weather agent provides:
+- Current weather conditions
+- Weather forecasts
+- Weather alerts
 
-### Model Configuration Protocol (MCP)
+### Citymapper Agent
 
-MCP enables agents to dynamically discover and use tools:
-- Weather data retrieval tools
-- Travel planning and route optimization tools
-- Location-based activity recommendations
+The citymapper agent provides:
+- Travel planning recommendations
+- Points of interest
+- Transportation options
 
-### State Management
+## Troubleshooting
 
-All agents use DynamoDB for conversation state management:
-- Persistent conversation history
-- User session isolation
-- Seamless conversation resumption
+See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues and solutions.
 
-## Contributing
+## License
 
-See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines on contributing to this project.
+This project is licensed under the Apache 2.0 License.

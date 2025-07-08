@@ -8,8 +8,15 @@ from strands import Agent
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Explicitly set region and endpoint URL from environment variables
+aws_region = os.environ.get('AWS_REGION', 'us-west-2')
+endpoint_url = os.environ.get('AWS_ENDPOINT_URL')
 
-ddb = boto3.resource('dynamodb')
+logger.info(f"Connecting to DynamoDB with region={aws_region}, endpoint_url={endpoint_url}")
+
+ddb = boto3.resource('dynamodb', 
+                    region_name=aws_region,
+                    endpoint_url=endpoint_url)
 agent_state_table = ddb.Table(os.environ['DYNAMODB_AGENT_STATE_TABLE_NAME'])
 
 def save(user_id: str, agent: Agent):
