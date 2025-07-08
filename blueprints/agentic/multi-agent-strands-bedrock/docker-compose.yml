@@ -1,85 +1,137 @@
 version: '3.8'
 
 services:
+  # Langfuse observability stack
+  langfuse-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse
+      POSTGRES_DB: langfuse
+    volumes:
+      - langfuse_db:/var/lib/postgresql/data
+    networks:
+      - multi-agent-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  langfuse:
+    image: langfuse/langfuse:latest
+    ports:
+      - "8000:3000"
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+      NEXTAUTH_URL: http://localhost:8000
+      NEXTAUTH_SECRET: mysecret
+      SALT: mysalt
+      TELEMETRY_ENABLED: false
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+    networks:
+      - multi-agent-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000/api/public/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Orchestrator agent
   orchestrator:
     build:
       context: ./orchestrator
-      dockerfile: ../weather/Dockerfile
-    ports:
-      - "9001:9000"  # A2A port
-    environment:
-      - AWS_REGION=${AWS_REGION:-us-west-2}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
-      - A2A_PORT=9000
-    volumes:
-      - ~/.aws:/app/.aws:ro
-    networks:
-      - agent-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/.well-known/agent.json"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  citymapper:
-    build:
-      context: ./citymapper
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"  # MCP port
-      - "9002:9000"  # A2A port
-      - "3000:3000"  # FastAPI port
+      - "${ORCHESTRATOR_PORT:-3000}:3000"  # FastAPI
     environment:
       - AWS_REGION=${AWS_REGION:-us-west-2}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
-      - MCP_PORT=8080
-      - A2A_PORT=9000
-      - FASTAPI_PORT=3000
+      - WEATHER_A2A_PORT=${WEATHER_A2A_PORT:-9000}
+      - CITYMAPPER_A2A_PORT=${CITYMAPPER_A2A_PORT:-9001}
+      - WEATHER_A2A_HOST=weather
+      - CITYMAPPER_A2A_HOST=citymapper
+      - DYNAMODB_AGENT_STATE_TABLE_NAME=${DYNAMODB_AGENT_STATE_TABLE_NAME:-agent-state-table}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-pk-lf-local-test}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-sk-lf-local-test}
+      - LANGFUSE_HOST=http://langfuse:3000
+      - DEBUG=${DEBUG:-1}
     volumes:
       - ~/.aws:/app/.aws:ro
     networks:
-      - agent-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - multi-agent-network
     depends_on:
-      - orchestrator
+      langfuse:
+        condition: service_healthy
 
+  # Weather agent
   weather:
     build:
       context: ./weather
       dockerfile: Dockerfile
     ports:
-      - "8081:8080"  # MCP port
-      - "9003:9000"  # A2A port
-      - "3001:3000"  # FastAPI port
+      - "${WEATHER_FASTAPI_PORT:-3001}:3000"  # FastAPI
+      - "${WEATHER_A2A_PORT:-9000}:9000"      # A2A
+      - "${WEATHER_MCP_PORT:-8080}:8080"      # MCP
     environment:
       - AWS_REGION=${AWS_REGION:-us-west-2}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
-      - MCP_PORT=8080
-      - A2A_PORT=9000
+      - A2A_PORT=${WEATHER_A2A_PORT:-9000}
+      - MCP_PORT=${WEATHER_MCP_PORT:-8080}
       - FASTAPI_PORT=3000
+      - DYNAMODB_AGENT_STATE_TABLE_NAME=${DYNAMODB_AGENT_STATE_TABLE_NAME:-agent-state-table}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-pk-lf-local-test}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-sk-lf-local-test}
+      - LANGFUSE_HOST=http://langfuse:3000
+      - DEBUG=${DEBUG:-1}
     volumes:
       - ~/.aws:/app/.aws:ro
     networks:
-      - agent-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - multi-agent-network
+    depends_on:
+      langfuse:
+        condition: service_healthy
+
+  # Citymapper agent
+  citymapper:
+    build:
+      context: ./citymapper
+      dockerfile: Dockerfile
+    ports:
+      - "${CITYMAPPER_FASTAPI_PORT:-3002}:3000"  # FastAPI
+      - "${CITYMAPPER_A2A_PORT:-9001}:9000"      # A2A
+      - "${CITYMAPPER_MCP_PORT:-8081}:8080"      # MCP
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-west-2}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
+      - A2A_PORT=${CITYMAPPER_A2A_PORT:-9001}
+      - MCP_PORT=${CITYMAPPER_MCP_PORT:-8081}
+      - FASTAPI_PORT=3000
+      - DYNAMODB_AGENT_STATE_TABLE_NAME=${DYNAMODB_AGENT_STATE_TABLE_NAME:-agent-state-table}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-travel-plans-bucket}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-pk-lf-local-test}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-sk-lf-local-test}
+      - LANGFUSE_HOST=http://langfuse:3000
+      - DEBUG=${DEBUG:-1}
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    networks:
+      - multi-agent-network
+    depends_on:
+      langfuse:
+        condition: service_healthy
+
+volumes:
+  langfuse_db:
 
 networks:
-  agent-network:
+  multi-agent-network:
     driver: bridge
