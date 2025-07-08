@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  # Mock DynamoDB for local development
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal"
+    volumes:
+      - dynamodb_data:/home/dynamodblocal
+    networks:
+      - multi-agent-network
+
   # Orchestrator agent
   orchestrator:
     build:
@@ -9,9 +20,10 @@ services:
     ports:
       - "${ORCHESTRATOR_PORT:-3000}:3000"  # FastAPI
     environment:
-      - AWS_REGION=${AWS_REGION:-us-west-2}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=us-west-2
+      - AWS_ACCESS_KEY_ID=fakeMyKeyId
+      - AWS_SECRET_ACCESS_KEY=fakeSecretAccessKey
+      - AWS_ENDPOINT_URL=http://dynamodb-local:8000
       - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
       - WEATHER_A2A_PORT=${WEATHER_A2A_PORT:-9000}
       - CITYMAPPER_A2A_PORT=${CITYMAPPER_A2A_PORT:-9001}
@@ -23,6 +35,8 @@ services:
       - ~/.aws:/app/.aws:ro
     networks:
       - multi-agent-network
+    depends_on:
+      - dynamodb-local
 
   # Weather agent
   weather:
@@ -34,9 +48,10 @@ services:
       - "${WEATHER_A2A_PORT:-9000}:9000"      # A2A
       - "${WEATHER_MCP_PORT:-8080}:8080"      # MCP
     environment:
-      - AWS_REGION=${AWS_REGION:-us-west-2}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=us-west-2
+      - AWS_ACCESS_KEY_ID=fakeMyKeyId
+      - AWS_SECRET_ACCESS_KEY=fakeSecretAccessKey
+      - AWS_ENDPOINT_URL=http://dynamodb-local:8000
       - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
       - A2A_PORT=${WEATHER_A2A_PORT:-9000}
       - MCP_PORT=${WEATHER_MCP_PORT:-8080}
@@ -47,6 +62,8 @@ services:
       - ~/.aws:/app/.aws:ro
     networks:
       - multi-agent-network
+    depends_on:
+      - dynamodb-local
 
   # Citymapper agent
   citymapper:
@@ -58,9 +75,10 @@ services:
       - "${CITYMAPPER_A2A_PORT:-9001}:9000"      # A2A
       - "${CITYMAPPER_MCP_PORT:-8081}:8080"      # MCP
     environment:
-      - AWS_REGION=${AWS_REGION:-us-west-2}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=us-west-2
+      - AWS_ACCESS_KEY_ID=fakeMyKeyId
+      - AWS_SECRET_ACCESS_KEY=fakeSecretAccessKey
+      - AWS_ENDPOINT_URL=http://dynamodb-local:8000
       - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-3-7-sonnet-20250219-v1:0}
       - A2A_PORT=${CITYMAPPER_A2A_PORT:-9001}
       - MCP_PORT=${CITYMAPPER_MCP_PORT:-8081}
@@ -72,6 +90,11 @@ services:
       - ~/.aws:/app/.aws:ro
     networks:
       - multi-agent-network
+    depends_on:
+      - dynamodb-local
+
+volumes:
+  dynamodb_data:
 
 networks:
   multi-agent-network:
