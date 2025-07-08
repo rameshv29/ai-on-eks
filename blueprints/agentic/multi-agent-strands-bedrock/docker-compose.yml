@@ -28,6 +28,8 @@ services:
       NEXTAUTH_SECRET: mysecret
       SALT: mysalt
       TELEMETRY_ENABLED: false
+      # Add this line to fix the error
+      CLICKHOUSE_ENABLED: false
     depends_on:
       langfuse-db:
         condition: service_healthy
