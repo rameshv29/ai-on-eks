@@ -1,4 +1,4 @@
-# Default values for agent.
+# Default values for mcp.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -15,9 +15,11 @@ image:
   tag: "latest"
 
 # MCP Config
+
 mcp:
   port: 8080
-
+  ingress:
+    enabled: false
 
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -29,7 +31,7 @@ fullnameOverride: ""
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account

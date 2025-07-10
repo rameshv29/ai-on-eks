@@ -7,15 +7,15 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.agent.mcp.port }}
+    - port: {{ .Values.mcp.port }}
       targetPort: mcp
       protocol: TCP
       name: mcp
-    - port: {{ .Values.agent.a2a.port }}
+    - port: {{ .Values.a2a.port }}
       targetPort: a2a
       protocol: TCP
       name: a2a
-    - port: {{ .Values.agent.fastapi.port }}
+    - port: {{ .Values.fastapi.port }}
       targetPort: fastapi
       protocol: TCP
       name: fastapi

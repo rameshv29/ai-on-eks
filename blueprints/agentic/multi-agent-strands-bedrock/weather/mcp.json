@@ -21,7 +21,7 @@
     "weather-mcp-http": {
       "disabled": true,
       "timeout": 60000,
-      "url": "http://weather-mcp-server:8080/mcp"
+      "url": "http://weather-mcp:8080/mcp"
     }
   }
 }

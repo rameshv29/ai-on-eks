@@ -1,3 +1,18 @@
+output "weather_agent_table_name" {
+  description = "The Name of DynamodDb Table for Weather Agent"
+  value       = aws_dynamodb_table.weather_agent_state_table.name
+}
+
+output "weather_agent_table_arn" {
+  description = "The ARN of DynamoDB Table for Weather Agent"
+  value       = aws_dynamodb_table.weather_agent_state_table.arn
+}
+
+output "bedrock_model_id" {
+  description = "Bedrock mode id for the agents"
+  value       = var.bedrock_model_id
+}
+
 output "cognito_user_pool_id" {
   description = "The ID of the Cognito User Pool"
   value       = aws_cognito_user_pool.user_pool.id
@@ -44,7 +59,7 @@ output "outputs_map" {
     cognito_sign_in_url : local.cognito_sign_in_url,
     cognito_logout_url : local.cognito_logout_url,
     cognito_well_known_url : local.cognito_well_known_url,
-    agent_endpoint : var.agent_endpoint
+    agent_endpoint : var.weather_web_agent_endpoint
   })
   sensitive = true
 }

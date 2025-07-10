@@ -14,22 +14,19 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-# Agent Config
+# Web UI Config
 
 env:
-  BEDROCK_MODEL_ID: "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
-  DYNAMODB_AGENT_STATE_TABLE_NAME: "weather-agent-to-be-replaced"
-  COGNITO_JWKS_URL: "https://idp-to-be-replaced"
-mcp:
-  port: 8080
-  ingress:
-    enabled: false
-a2a:
-  port: 9000
-  ingress:
-    enabled: false
+  COGNITO_CLIENT_ID: "to-be-replace"
+  COGNITO_CLIENT_SECRET: "to-be-replace"
+  COGNITO_SIGNIN_URL: "to-be-replace"
+  COGNITO_LOGOUT_URL: "to-be-replace"
+  COGNITO_WELL_KNOWN_URL: "to-be-replace"
+  COGNITO_JWKS_URL: "to-be-replace"
+  AGENT_ENDPOINT_URL: "to-be-replace"
+
 fastapi:
-  port: 3000
+  port: 8000
   ingress:
     enabled: false
 
@@ -43,7 +40,7 @@ fullnameOverride: ""
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
@@ -107,13 +104,11 @@ resources: {}
 
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
-  httpGet:
-    path: /health
-    port: 3000
+  tcpSocket:
+    port: 8000
 readinessProbe:
-  httpGet:
-    path: /health
-    port: 3000
+  tcpSocket:
+    port: 8000
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:

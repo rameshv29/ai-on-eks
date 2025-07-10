@@ -181,6 +181,63 @@ async def test_a2a_protocol(base_url: str = "http://localhost:9000"):
                     print(f"❌ Full response test failed: {error_msg[:60]}...")
 
             print()
+
+            # Test 7: Conversational Memory Loss Test
+            print("7. Testing conversational memory loss (forecast then alerts)...")
+            try:
+                # First, ask for weather forecast for a specific city
+                forecast_query = "What's the weather forecast for Denver, Colorado?"
+                request1 = create_message_request(forecast_query)
+                print(f"   First Query: {forecast_query}")
+
+                response1 = await client.send_message(request1)
+
+                # Extract and display first response
+                response_dict1 = json.loads(response1.model_dump_json(exclude_none=True))
+                if "result" in response_dict1 and "parts" in response_dict1["result"]:
+                    for part in response_dict1["result"]["parts"]:
+                        if part.get("kind") == "text" and "text" in part:
+                            response_text1 = part["text"]
+                            print(f"   First Response: {response_text1[:80]}...")
+                            break
+
+                print()
+
+                # Then, ask for alerts without specifying location - should NOT remember Denver
+                alert_query = "Any alerts?"
+                request2 = create_message_request(alert_query)
+                print(f"   Follow-up Query: {alert_query}")
+
+                response2 = await client.send_message(request2)
+
+                # Extract and display second response
+                response_dict2 = json.loads(response2.model_dump_json(exclude_none=True))
+                if "result" in response_dict2 and "parts" in response_dict2["result"]:
+                    for part in response_dict2["result"]["parts"]:
+                        if part.get("kind") == "text" and "text" in part:
+                            response_text2 = part["text"]
+                            print(f"   Follow-up Response: {response_text2[:80]}...")
+
+                            # Check that the response does NOT mention Denver or Colorado (memory loss)
+                            response_lower = response_text2.lower()
+
+                            if "denver" in response_lower or "colorado" in response_lower:
+                                print("❌ Conversational memory loss test failed")
+                                print("   Agent still remembers the previous location (memory not cleared)")
+                                return False
+                            else:
+                                print("✅ Conversational memory loss test successful")
+                                print("   Agent correctly forgot the previous location (Denver/Colorado not mentioned)")
+                            break
+                else:
+                    print("✅ Conversational memory loss test completed")
+                    print("   Agent processed follow-up query (memory state unclear)")
+
+            except Exception as e:
+                print(f"❌ Conversational memory loss test failed: {str(e)}")
+                return False
+
+            print()
             print("=" * 50)
             print("A2A Protocol testing completed!")
             return True
@@ -277,5 +334,10 @@ async def main():
         sys.exit(1)
 
 
-if __name__ == "__main__":
+def run_main():
+    """Wrapper function for script entry point."""
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    run_main()

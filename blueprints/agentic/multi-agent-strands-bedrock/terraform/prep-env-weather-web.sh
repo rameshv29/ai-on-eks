@@ -10,6 +10,10 @@ if ! [ -x "$(command -v aws)" ]; then
   exit 1
 fi
 
+WEB_DST_FILE_NAME=${WEB_DST_FILE_NAME:-../weather/web/.env}
+echo "> Injecting values into $WEB_DST_FILE_NAME"
+echo "" > $WEB_DST_FILE_NAME
+
 echo "> Parsing Terraform outputs"
 TERRAFORM_OUTPUTS_MAP=$(terraform output --json outputs_map)
 #echo $TERRAFORM_OUTPUTS_MAP
@@ -36,9 +40,7 @@ aws cognito-idp admin-set-user-password --user-pool-id $COGNITO_USER_POOL_ID --u
 aws cognito-idp admin-set-user-password --user-pool-id $COGNITO_USER_POOL_ID --username Bob --password "Passw0rd@" --permanent
 
 
-WEB_DST_FILE_NAME=${WEB_DST_FILE_NAME:-../../../weather/web/.env}
-echo "> Injecting values into $WEB_DST_FILE_NAME"
-echo "" > $WEB_DST_FILE_NAME
+
 echo "COGNITO_CLIENT_ID=\"$COGNITO_CLIENT_ID\"" >> $WEB_DST_FILE_NAME
 echo "COGNITO_CLIENT_SECRET=\"$COGNITO_CLIENT_SECRET\"" >> $WEB_DST_FILE_NAME
 echo "COGNITO_SIGNIN_URL=\"$COGNITO_SIGN_IN_URL\"" >> $WEB_DST_FILE_NAME
@@ -46,10 +48,5 @@ echo "COGNITO_LOGOUT_URL=\"$COGNITO_LOGOUT_URL\"" >> $WEB_DST_FILE_NAME
 echo "COGNITO_WELL_KNOWN_URL=\"$COGNITO_WELL_KNOWN_URL\"" >> $WEB_DST_FILE_NAME
 echo "COGNITO_JWKS_URL=\"$COGNITO_JWKS_URL\"" >> $WEB_DST_FILE_NAME
 echo "AGENT_ENDPOINT_URL=\"$AGENT_ENDPOINT_URL\"" >> $WEB_DST_FILE_NAME
-
-WEATHER_DST_FILE_NAME=${WEATHER_DST_FILE_NAME:-../../../weather/.env}
-echo "> Injecting values into $WEATHER_DST_FILE_NAME"
-echo "" >> $WEATHER_DST_FILE_NAME
-echo "COGNITO_JWKS_URL=\"$COGNITO_JWKS_URL\"" >> $WEATHER_DST_FILE_NAME
 
 echo "> Done"

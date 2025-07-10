@@ -14,9 +14,9 @@
            You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "agent.fullname" . }}'
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "agent.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
   echo "Weather Agent Triple Protocol Server is available at:"
-  echo "  MCP Server: http://$SERVICE_IP:{{ .Values.agent.mcp.port }}/mcp"
-  echo "  A2A Server: http://$SERVICE_IP:{{ .Values.agent.a2a.port }}"
-  echo "  FastAPI: http://$SERVICE_IP:{{ .Values.agent.fastapi.port }}/health"
+  echo "  MCP Server: http://$SERVICE_IP:{{ .Values.mcp.port }}/mcp"
+  echo "  A2A Server: http://$SERVICE_IP:{{ .Values.a2a.port }}"
+  echo "  FastAPI: http://$SERVICE_IP:{{ .Values.fastapi.port }}/health"
 {{- else if contains "ClusterIP" .Values.service.type }}
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "agent.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
   echo "Weather Agent Triple Protocol Server is running!"
@@ -24,14 +24,14 @@
   echo "To access the services, run the following port-forward commands:"
   echo ""
   echo "MCP Server (Model Context Protocol):"
-  echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "agent.fullname" . }} {{ .Values.agent.mcp.port }}:mcp"
-  echo "  Then visit: http://127.0.0.1:{{ .Values.agent.mcp.port }}/mcp"
+  echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "agent.fullname" . }} {{ .Values.mcp.port }}:mcp"
+  echo "  Then visit: http://127.0.0.1:{{ .Values.mcp.port }}/mcp"
   echo ""
   echo "A2A Server (Agent-to-Agent):"
-  echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "agent.fullname" . }} {{ .Values.agent.a2a.port }}:a2a"
-  echo "  Then visit: http://127.0.0.1:{{ .Values.agent.a2a.port }}"
+  echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "agent.fullname" . }} {{ .Values.a2a.port }}:a2a"
+  echo "  Then visit: http://127.0.0.1:{{ .Values.a2a.port }}"
   echo ""
   echo "FastAPI Server:"
-  echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "agent.fullname" . }} {{ .Values.agent.fastapi.port }}:fastapi"
-  echo "  Then visit: http://127.0.0.1:{{ .Values.agent.fastapi.port }}/health"
+  echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "agent.fullname" . }} {{ .Values.fastapi.port }}:fastapi"
+  echo "  Then visit: http://127.0.0.1:{{ .Values.fastapi.port }}/health"
 {{- end }}

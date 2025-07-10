@@ -27,10 +27,6 @@ provider "helm" {
 # Common data/locals
 ################################################################################
 
-data "aws_ecrpublic_authorization_token" "token" {
-  provider = aws.ecr
-}
-
 data "aws_availability_zones" "available" {
   # Do not include local zones
   filter {
